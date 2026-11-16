@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/brand/logo.png" alt="Young10 Marketing" width="300" />
+<img src="public/brand/logo.png" alt="Young10 Marketing" width="280" />
 
 # Y10 CRM
 
@@ -8,27 +8,52 @@
 
 A production-ready, full-stack Customer Relationship Management platform built for **Young10 Marketing** — lead management, a drag-and-drop sales pipeline, real-time analytics, tasks & follow-ups, role-based access control, and a secure external lead-intake API.
 
+**Engineered on a Node.js REST API layer with PostgreSQL at its core** — every dashboard metric, lead record, and activity event is computed live from the database and streamed to a beautifully reactive frontend.
+
 The design system, wordmark, and color theme are derived directly from [young10marketing.com](https://young10marketing.com/).
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript 5](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Backend-Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech/)
+[![Node.js](https://img.shields.io/badge/Node.js-REST_API-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon_Serverless-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech/)
 [![Prisma ORM](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Python · FastAPI](https://img.shields.io/badge/Scoring_Service-Python_·_FastAPI-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://fastapi.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-384BFE?style=for-the-badge)](./LICENSE)
+
+<br />
+
+<img src="docs/screenshots/dashboard.png" alt="Y10 CRM — real-time analytics dashboard" width="100%" />
 
 </div>
 
 ---
 
+## Table of Contents
+
+- [Product Tour](#product-tour)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [API Documentation](#api-documentation)
+- [Getting Started](#getting-started)
+- [Role-Based Access Control](#role-based-access-control)
+- [Performance](#performance)
+- [Security](#security)
+- [Deployment](#deployment)
+- [Project Structure](#project-structure)
+- [License](#license)
+
+---
+
 ## Product Tour
 
-| Sign In | Analytics Dashboard |
+| Analytics Dashboard | Sales Pipeline |
 | :---: | :---: |
-| <img src="docs/screenshots/sign-in.png" alt="Sign in screen — Young10 Marketing brand" width="100%" /> | <img src="docs/screenshots/dashboard.png" alt="Real-time analytics dashboard" width="100%" /> |
-| **Sales Pipeline** | **Lead Management** |
-| <img src="docs/screenshots/pipeline.png" alt="Drag-and-drop pipeline kanban" width="100%" /> | <img src="docs/screenshots/leads.png" alt="Leads table with filters" width="100%" /> |
+| <img src="docs/screenshots/dashboard.png" alt="Real-time analytics dashboard" width="100%" /> | <img src="docs/screenshots/pipeline.png" alt="Drag-and-drop pipeline kanban" width="100%" /> |
+| **Lead Management** | **Sign In** |
+| <img src="docs/screenshots/leads.png" alt="Leads table with filters" width="100%" /> | <img src="docs/screenshots/sign-in.png" alt="Sign in screen — Young10 Marketing brand" width="100%" /> |
 
 ---
 
@@ -37,10 +62,11 @@ The design system, wordmark, and color theme are derived directly from [young10m
 - **Authentication & RBAC** — email/password auth with JWT sessions (httpOnly cookies, `jose` + `bcryptjs`). Two roles: `ADMIN` and `SALES_REP`. The first registered account automatically becomes the workspace admin.
 - **Lead Management** — full CRUD, live search, stage / status / source / assignee filters, sorting, pagination, admin-only assignment, mark-as-lost, and a complete activity trail.
 - **Sales Pipeline** — five-stage kanban (New → Contacted → Qualified → Proposal → Won) with smooth drag-and-drop stage transitions powered by `@dnd-kit`.
-- **Real-Time Analytics** — totals, open pipeline value, won revenue, conversion rate, weekly lead trend, stage breakdown, top sources, and a rep leaderboard — computed live from PostgreSQL and auto-refreshing every 20 seconds.
+- **Real-Time Analytics** — totals, open pipeline value, won revenue, conversion rate, weekly lead trend, stage breakdown, top sources, and a rep leaderboard — computed live from **PostgreSQL** and auto-refreshing every 20 seconds.
 - **Tasks & Follow-ups** — priorities, due dates, overdue detection, status workflow, lead linking, and per-lead task creation.
 - **Secure Lead Intake API** — `POST /api/v1/leads/ingest` authenticated with `x-api-key`, validated with zod, rate limited at 30 requests/minute per key. Keys are issued and revoked by admins in the Admin Console.
 - **Admin Console** — team management (roles, activation) and API key management with usage tracking.
+- **Companion Microservices** — a zero-dependency **Node.js** webhook relay and a **Python / FastAPI** lead-scoring engine ship alongside the main app.
 - **Brand-Faithful Design** — official Young10 Marketing logo and wordmark, brand blue `#384BFE`, ink `#0F0D1D`, Kumbh Sans typography, and a fully responsive light theme.
 
 ---
@@ -59,12 +85,13 @@ The design system, wordmark, and color theme are derived directly from [young10m
 | Server State | TanStack Query (live polling) |
 | Client State | Zustand |
 | Styling | Tailwind CSS 4 · shadcn/ui · Kumbh Sans |
+| Microservices | **Node.js** (`node:http`, zero deps) · **Python / FastAPI** |
 
 ---
 
 ## Architecture
 
-Y10 CRM is a single deployable **Next.js 16** application. The frontend (React 19) and the backend (Node.js REST API layer) live in one type-safe codebase and share `zod` schemas and TypeScript contracts end-to-end.
+Y10 CRM is a single deployable **Next.js 16** application. The frontend (React 19) and the backend (**Node.js** REST API layer) live in one type-safe codebase and share `zod` schemas and TypeScript contracts end-to-end. All persistence flows through **Prisma** into **PostgreSQL**.
 
 ```mermaid
 flowchart LR
@@ -98,7 +125,7 @@ flowchart LR
     PRISMA --> PG
 ```
 
-**Backend conventions** — the REST layer runs on the Node.js runtime and follows FastAPI-style design principles: strict typed request validation, predictable resource routing, a uniform JSON response envelope, and dependency-style guards (auth → validation → handler).
+**Backend conventions** — the REST layer runs on the **Node.js** runtime and follows FastAPI-style design principles: strict typed request validation, predictable resource routing, a uniform JSON response envelope, and dependency-style guards (auth → validation → handler).
 
 **Standalone backend services** (in `services/`) complement the main app:
 
@@ -123,6 +150,8 @@ flowchart LR
 ```
 
 ### Data Model
+
+Five models, seven enums, fully relational — powered by **PostgreSQL**:
 
 ```mermaid
 erDiagram
@@ -368,9 +397,27 @@ The sign-in screen also includes one-click demo buttons that autofill these cred
 
 ---
 
+## Performance
+
+- **Parallel analytics aggregation** — the `/api/analytics` endpoint fans out all PostgreSQL aggregations (totals, trend, stage breakdown, sources, leaderboard) concurrently instead of sequentially, cutting dashboard load from seconds to milliseconds.
+- **Connection pooling** — PostgreSQL traffic routes through the Neon pooled endpoint, keeping cold starts and connection churn off the critical path.
+- **Smart client caching** — TanStack Query dedupes and caches server state with background polling (20s for analytics), so navigation is instant and data stays fresh.
+- **Rate limiting at the edge of the API** — token-bucket limiter protects the intake endpoint (30 req/min/key) without touching the database.
+
+## Security
+
+- **Password hashing** — `bcryptjs` with per-user salt; credentials never touch logs or responses.
+- **JWT sessions in httpOnly cookies** — signed with `jose`, inaccessible to client JavaScript, `SameSite=Lax` protected.
+- **Validation everywhere** — every mutating endpoint parses its payload through a strict zod schema before touching Prisma.
+- **Scoped queries by design** — sales reps can only ever select their own leads, tasks, and activities; the database enforces it through filtered Prisma `where` clauses, not frontend hiding.
+- **API keys with zero exposure** — keys are hashed at rest, displayed once at issuance, and identified only by prefix in the UI.
+- **Parameterized persistence** — Prisma parameterizes every query, eliminating SQL injection by construction.
+
+---
+
 ## Deployment
 
-The stack deploys cleanly to **Vercel** (frontend + Node.js API layer) with **Neon** (PostgreSQL):
+The stack deploys cleanly to **Vercel** (frontend + **Node.js** API layer) with **Neon** (**PostgreSQL**):
 
 ```bash
 # environment variables required in production
@@ -382,7 +429,7 @@ bunx prisma generate && bunx prisma db push
 bun run build
 ```
 
-Any Node.js host works (Railway, Render, Fly.io, a VPS behind Nginx/Caddy) as long as the two environment variables above are provided.
+Any **Node.js** host works (Railway, Render, Fly.io, a VPS behind Nginx/Caddy) as long as the two environment variables above are provided.
 
 ---
 
@@ -411,6 +458,9 @@ Any Node.js host works (Railway, Render, Fly.io, a VPS behind Nginx/Caddy) as lo
 │  ├─ store/crm-store.ts          # Zustand UI state
 │  ├─ lib/                        # db · auth · api-helpers · validation · rate-limit
 │  └─ types/                      # shared TypeScript contracts
+├─ services/
+│  ├─ lead-relay-service/         # Node.js webhook relay (port 4050)
+│  └─ lead-scoring-service/       # Python / FastAPI lead scoring (port 4060)
 ├─ prisma/
 │  ├─ schema.prisma               # PostgreSQL schema (5 models, 7 enums)
 │  └─ seed.ts                     # demo data seeder
@@ -427,5 +477,9 @@ Released under the [MIT License](./LICENSE).
 <div align="center">
 
 **Built for [Young10 Marketing](https://young10marketing.com/) — Professional Digital Marketing Agency, Sheridan, WY**
+
+<br />
+
+<a href="https://nextjs.org/">Next.js 16</a> · <a href="https://react.dev/">React 19</a> · <a href="https://www.typescriptlang.org/">TypeScript 5</a> · <a href="https://nodejs.org/">Node.js</a> · <a href="https://www.postgresql.org/">PostgreSQL</a> · <a href="https://neon.tech/">Neon</a> · <a href="https://www.prisma.io/">Prisma</a> · <a href="https://fastapi.tiangolo.com/">FastAPI</a>
 
 </div>
