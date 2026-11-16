@@ -65,3 +65,14 @@ agent-ctx/
 
 # local sqlite leftover (using Neon PostgreSQL)
 db/custom.db
+
+# sandbox / local-only artifacts (not part of the product)
+.zscripts/
+Caddyfile
+examples/
+mini-services/
+tests/
+download/
+y10-full.html
+prompt
+test
