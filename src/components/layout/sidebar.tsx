@@ -45,7 +45,7 @@ export function SidebarNavContent({ user, onNavigate }: { user: SafeUser; onNavi
   return (
     <div className="flex h-full flex-col bg-white">
       <div className="px-5 pb-7 pt-7">
-        <Logo height={32} />
+        <Logo height={44} />
       </div>
 
       <p className="px-6 pb-2 text-[10.5px] font-bold uppercase tracking-[0.16em] text-muted-foreground/80">

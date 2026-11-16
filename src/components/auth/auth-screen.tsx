@@ -204,8 +204,8 @@ export default function AuthScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: 'easeOut' }}
           >
-            <Logo height={46} className="hidden lg:inline-flex" />
-            <div className="mt-12 flex items-center gap-3 lg:mt-14">
+            <Logo height={64} className="hidden lg:inline-flex" />
+            <div className="mt-10 flex items-center gap-3 lg:mt-12">
               <span className="h-[3px] w-9 rounded-full bg-primary" aria-hidden="true" />
               <p className="text-[13px] font-bold uppercase tracking-[0.18em] text-primary">
                 Your growth, in focus
@@ -232,7 +232,7 @@ export default function AuthScreen() {
             className="w-full max-w-[460px] justify-self-center"
           >
             <div className="card-float rounded-2xl border border-white/70 bg-white px-7 py-8 sm:px-9 sm:py-9">
-              <Logo height={38} className="lg:hidden" />
+              <Logo height={48} className="lg:hidden" />
 
               <motion.div
                 key={mode}
