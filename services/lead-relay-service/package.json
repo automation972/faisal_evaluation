@@ -1,0 +1,14 @@
+{
+  "name": "y10-lead-relay-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone Node.js webhook relay that captures leads from external providers and forwards them to the Y10 CRM intake API",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

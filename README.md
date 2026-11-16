@@ -100,6 +100,18 @@ flowchart LR
 
 **Backend conventions** — the REST layer runs on the Node.js runtime and follows FastAPI-style design principles: strict typed request validation, predictable resource routing, a uniform JSON response envelope, and dependency-style guards (auth → validation → handler).
 
+**Standalone backend services** (in `services/`) complement the main app:
+
+| Service | Runtime | Path | Purpose |
+| --- | --- | --- | --- |
+| Lead Relay | **Node.js** (pure `node:http`, zero deps) | `services/lead-relay-service/server.js` | Webhook relay — normalizes provider payloads (Typeform, ads, forms) and forwards them to the CRM intake API with retries + dedupe |
+| Lead Scoring | **Python / FastAPI** | `services/lead-scoring-service/main.py` | Scores leads 0-100 (HOT / WARM / COLD) with a factor breakdown so reps know who to call first |
+
+```bash
+# Node.js relay  →  node services/lead-relay-service/server.js     (port 4050)
+# FastAPI scorer →  uvicorn main:app --port 4060                   (port 4060, run from services/lead-scoring-service/)
+```
+
 **Every** API response uses one envelope:
 
 ```json
