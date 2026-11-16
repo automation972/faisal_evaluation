@@ -50,11 +50,9 @@ import {
 } from '@/components/shared/badges';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -85,7 +83,6 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const UNASSIGNED = 'UNASSIGNED';
-const DANGER = '#DC2626';
 
 function ContactRow({
   icon: Icon,
@@ -169,7 +166,7 @@ function TaskRow({
 
 function DetailSkeleton() {
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 px-5 py-5">
       <div className="flex items-center gap-3">
         <Skeleton className="size-11 rounded-full" />
         <div className="space-y-2">
@@ -319,17 +316,17 @@ export function LeadDetailSheet() {
         ) : (
           <>
             {/* Header */}
-            <SheetHeader className="border-b p-4 pb-4">
+            <SheetHeader className="shrink-0 border-b border-border/70 px-5 py-5">
               <div className="flex items-start gap-3 pr-8">
                 <UserAvatar
                   name={`${lead.firstName} ${lead.lastName}`}
                   className="h-11 w-11 [&>span]:text-sm"
                 />
                 <div className="min-w-0 space-y-1.5">
-                  <SheetTitle className="text-base leading-snug">
+                  <SheetTitle className="text-base font-bold tracking-tight leading-snug">
                     {lead.firstName} {lead.lastName}
                   </SheetTitle>
-                  <SheetDescription className="truncate text-sm">
+                  <SheetDescription className="truncate text-[13px]">
                     {lead.company ?? 'No company'}
                   </SheetDescription>
                   <div className="flex flex-wrap gap-1.5">
@@ -342,22 +339,24 @@ export function LeadDetailSheet() {
 
             {/* Body */}
             <ScrollArea className="min-h-0 flex-1">
-              <div className="space-y-6 p-4">
-                {/* Contact card */}
-                <Card className="card-shadow gap-3 p-4">
+              <div>
+                {/* Contact */}
+                <div className="flex flex-col gap-4 border-b border-border/70 px-5 py-5">
                   <ContactRow icon={Mail} label="Email" value={lead.email} />
                   <ContactRow icon={Phone} label="Phone" value={lead.phone} />
                   <ContactRow icon={Building2} label="Company" value={lead.company} />
                   <ContactRow icon={Briefcase} label="Job title" value={lead.jobTitle} />
-                </Card>
+                </div>
 
                 {/* Value + status */}
-                <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <div className="flex items-start justify-between gap-4 border-b border-border/70 px-5 py-5">
+                  <div className="space-y-1.5">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                       Deal value
                     </p>
-                    <p className="text-2xl font-bold">{formatCurrency(lead.value)}</p>
+                    <p className="text-2xl font-bold tabular-nums tracking-tight">
+                      {formatCurrency(lead.value)}
+                    </p>
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
                     <Badge
@@ -381,14 +380,14 @@ export function LeadDetailSheet() {
                 </div>
 
                 {/* Pipeline controls */}
-                <div className="space-y-4">
+                <div className="space-y-4 border-b border-border/70 px-5 py-5">
                   <div className="space-y-1.5">
-                    <Label htmlFor="detail-stage">Stage</Label>
+                    <Label htmlFor="detail-stage" className="text-[13px] font-semibold">Stage</Label>
                     <Select
                       value={lead.stage}
                       onValueChange={(v) => void handleStageChange(v)}
                     >
-                      <SelectTrigger id="detail-stage" className="w-full">
+                      <SelectTrigger id="detail-stage" className="data-[size=default]:h-10 w-full rounded-[10px] border-border bg-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -403,12 +402,12 @@ export function LeadDetailSheet() {
 
                   {isAdmin && (
                     <div className="space-y-1.5">
-                      <Label htmlFor="detail-assignee">Assigned to</Label>
+                      <Label htmlFor="detail-assignee" className="text-[13px] font-semibold">Assigned to</Label>
                       <Select
                         value={lead.assignedToId ?? UNASSIGNED}
                         onValueChange={(v) => void handleAssign(v)}
                       >
-                        <SelectTrigger id="detail-assignee" className="w-full">
+                        <SelectTrigger id="detail-assignee" className="data-[size=default]:h-10 w-full rounded-[10px] border-border bg-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -428,7 +427,7 @@ export function LeadDetailSheet() {
                       <AlertDialogTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full border-[#DC2626]/40 text-[#DC2626] hover:bg-[#FDE7E7] hover:text-[#DC2626]"
+                          className="h-10 w-full rounded-[10px] border-[#DC2626]/40 bg-white font-medium text-[#DC2626] hover:bg-[#FDE7E7] hover:text-[#DC2626]"
                         >
                           <TrendingDown className="size-4" />
                           Mark as Lost
@@ -457,9 +456,9 @@ export function LeadDetailSheet() {
                 </div>
 
                 {/* Notes */}
-                <div className="space-y-2">
+                <div className="space-y-2 border-b border-border/70 px-5 py-5">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="detail-notes">Notes</Label>
+                    <Label htmlFor="detail-notes" className="text-[13px] font-semibold">Notes</Label>
                     <span className="text-xs text-muted-foreground">
                       {notes.length} characters
                     </span>
@@ -470,12 +469,12 @@ export function LeadDetailSheet() {
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Add context about this lead..."
                     rows={5}
+                    className="rounded-[10px] border-border bg-white"
                   />
                   <Button
-                    size="sm"
                     disabled={updateLead.isPending}
                     onClick={() => void handleSaveNotes()}
-                    className="bg-[#384BFE] text-white hover:bg-[#2B3AD1]"
+                    className="h-10 rounded-[10px] bg-primary px-4 font-semibold text-white hover:bg-[#2B3AD1]"
                   >
                     {updateLead.isPending ? (
                       <Loader2 className="size-4 animate-spin" />
@@ -487,15 +486,15 @@ export function LeadDetailSheet() {
                 </div>
 
                 {/* Tasks */}
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <div className="space-y-3 border-b border-border/70 px-5 py-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Follow-up tasks
                   </p>
 
                   {(taskData?.tasks ?? []).length === 0 ? (
                     <p className="text-sm text-muted-foreground">No tasks yet</p>
                   ) : (
-                    <div className="divide-y rounded-xl border px-3">
+                    <div className="divide-y divide-border/60 rounded-[10px] border border-border bg-white px-3">
                       {(taskData?.tasks ?? []).map((task) => (
                         <TaskRow
                           key={task.id}
@@ -508,19 +507,19 @@ export function LeadDetailSheet() {
                   )}
 
                   {/* Add-task inline form */}
-                  <div className="space-y-2 rounded-xl border bg-muted/40 p-3">
+                  <div className="space-y-2 rounded-[10px] border border-border bg-[#F8F9FC] p-3">
                     <Input
                       value={taskTitle}
                       onChange={(e) => setTaskTitle(e.target.value)}
                       placeholder="Task title"
-                      className="h-8 bg-background"
+                      className="h-10 rounded-[10px] border-border bg-white"
                     />
                     <div className="flex items-center gap-2">
                       <Select
                         value={taskPriority}
                         onValueChange={(v) => setTaskPriority(v as TaskPriorityValue)}
                       >
-                        <SelectTrigger size="sm" className="h-8 w-[110px] bg-background">
+                        <SelectTrigger size="sm" className="data-[size=sm]:h-10 w-[110px] rounded-[10px] border-border bg-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -536,13 +535,13 @@ export function LeadDetailSheet() {
                         value={taskDate}
                         onChange={(e) => setTaskDate(e.target.value)}
                         aria-label="Due date"
-                        className="h-8 flex-1 bg-background"
+                        className="h-10 flex-1 rounded-[10px] border-border bg-white"
                       />
                       <Button
                         size="sm"
                         disabled={!taskTitle.trim() || createTask.isPending}
                         onClick={() => void handleAddTask()}
-                        className="h-8 bg-[#384BFE] px-2.5 text-white hover:bg-[#2B3AD1]"
+                        className="h-10 rounded-[10px] bg-primary px-3 text-white hover:bg-[#2B3AD1]"
                       >
                         {createTask.isPending ? (
                           <Loader2 className="size-4 animate-spin" />
@@ -556,8 +555,8 @@ export function LeadDetailSheet() {
                 </div>
 
                 {/* Activity timeline */}
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <div className="space-y-3 px-5 py-5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                     Activity
                   </p>
                   {(activities ?? []).length === 0 ? (
@@ -567,11 +566,7 @@ export function LeadDetailSheet() {
                       {(activities ?? []).map((activity) => (
                         <div key={activity.id} className="flex gap-3">
                           <div className="flex flex-col items-center pt-1.5">
-                            <span
-                              className="size-2 shrink-0 rounded-full"
-                              style={{ backgroundColor: '#384BFE' }}
-                              aria-hidden
-                            />
+                            <span className="size-2 shrink-0 rounded-full bg-primary" aria-hidden />
                             <span className="mt-1 w-px flex-1 bg-border" aria-hidden />
                           </div>
                           <div className="min-w-0 flex-1 pb-1">
@@ -598,11 +593,10 @@ export function LeadDetailSheet() {
             {/* Admin danger zone */}
             {isAdmin && (
               <div className="mt-auto">
-                <Separator />
-                <SheetFooter className="p-4">
+                <SheetFooter className="border-t border-border/70 bg-white px-5 py-4">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="destructive" className="w-full">
+                      <Button variant="destructive" className="h-10 w-full rounded-[10px] font-semibold">
                         <Trash2 className="size-4" />
                         Delete lead
                       </Button>

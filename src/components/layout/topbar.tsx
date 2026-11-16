@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { SidebarNavContent } from '@/components/layout/sidebar';
+import { Logo } from '@/components/brand/logo';
 import { useCrmStore, type CrmView } from '@/store/crm-store';
 import { useTasks } from '@/hooks/use-crm';
 import { UserAvatar } from '@/components/shared/badges';
@@ -24,13 +25,12 @@ const VIEW_META: Record<CrmView, { title: string; kicker: string }> = {
 };
 
 export function Topbar({ user }: { user: SafeUser }) {
-  const view = useCrmStore((s) => s.view);
   const setView = useCrmStore((s) => s.setView);
   const mobileNavOpen = useCrmStore((s) => s.mobileNavOpen);
   const setMobileNavOpen = useCrmStore((s) => s.setMobileNavOpen);
   const [now, setNow] = useState(() => new Date());
 
-  // Alert count: overdue + due-today tasks (server truth, polls every 20s)
+  // Alert count: overdue tasks (server truth, polls via TanStack Query)
   const { data: tasksData } = useTasks({ status: 'ALL', mine: true });
   const alertCount = (tasksData?.counts.overdue ?? 0) + 0;
 
@@ -39,11 +39,10 @@ export function Topbar({ user }: { user: SafeUser }) {
     return () => clearInterval(t);
   }, []);
 
-  const meta = VIEW_META[view];
   const dateLabel = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-white/90 px-4 backdrop-blur md:px-8">
+    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-[#ECEEF5] bg-white px-4 md:px-8">
       <div className="flex items-center gap-3">
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetTrigger asChild>
@@ -51,28 +50,27 @@ export function Topbar({ user }: { user: SafeUser }) {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 border-0 ink-gradient p-0">
+          <SheetContent side="left" className="w-72 border-0 p-0">
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <SidebarNavContent user={user} onNavigate={() => setMobileNavOpen(false)} />
           </SheetContent>
         </Sheet>
 
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{meta.kicker}</p>
-          <h2 className="text-base font-bold leading-tight md:text-lg">{meta.title}</h2>
-        </div>
+        <span className="md:hidden">
+          <Logo height={26} />
+        </span>
       </div>
 
       <div className="flex items-center gap-2 md:gap-4">
-        <p className="hidden text-sm text-muted-foreground lg:block">{dateLabel}</p>
+        <p className="hidden text-[13px] text-muted-foreground lg:block">{dateLabel}</p>
 
         <button
           type="button"
           onClick={() => setView('tasks')}
-          className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="relative rounded-[10px] p-2 text-[#5F6274] transition-colors hover:bg-[#F4F5FA] hover:text-foreground"
           aria-label={`${alertCount} overdue tasks`}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-[18px] w-[18px]" />
           {alertCount > 0 && (
             <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#DC2626] px-1 text-[10px] font-bold text-white">
               {alertCount}
@@ -80,11 +78,11 @@ export function Topbar({ user }: { user: SafeUser }) {
           )}
         </button>
 
-        <div className="hidden items-center gap-2.5 rounded-full border bg-white py-1 pl-1 pr-3 md:flex">
+        <div className="hidden items-center gap-2.5 rounded-full border border-[#ECEEF5] bg-white py-1 pl-1 pr-3.5 md:flex">
           <UserAvatar name={user.name} size="sm" />
           <div className="leading-tight">
             <p className="text-xs font-semibold">{user.name}</p>
-            <p className="text-[10px] text-muted-foreground">{VIEW_META[view].title}</p>
+            <p className="text-[10px] text-muted-foreground">{user.role === 'ADMIN' ? 'Admin' : 'Sales Rep'}</p>
           </div>
         </div>
       </div>

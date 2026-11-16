@@ -80,8 +80,8 @@ const CURL_SNIPPET = [
 ].join('\n');
 
 const KEY_MASK_SUFFIX = '••••••••••••';
-const UNDERLINE_TRIGGER =
-  'h-auto rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 pt-2 shadow-none data-[state=active]:border-[#384BFE] data-[state=active]:bg-transparent data-[state=active]:shadow-none';
+const SEGMENT_TRIGGER =
+  'h-7 rounded-[7px] border-transparent px-4 text-[13px] font-medium text-[#5F6274] shadow-none hover:bg-[#F4F5FA] data-[state=active]:bg-[#EEF0FF] data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=active]:shadow-none';
 
 async function copyText(value: string) {
   try {
@@ -122,75 +122,97 @@ function NewUserForm({ close }: { close: () => void }) {
 
   return (
     <>
-      <DialogHeader>
-        <DialogTitle>Add Member</DialogTitle>
-        <DialogDescription>Create an account for a new teammate.</DialogDescription>
+      <DialogHeader className="gap-1 border-b px-6 py-5">
+        <DialogTitle className="text-[15px] font-bold tracking-tight">Add Member</DialogTitle>
+        <DialogDescription className="text-[13px] text-muted-foreground">
+          Create an account for a new teammate.
+        </DialogDescription>
       </DialogHeader>
       <form
-        className="grid gap-4"
         onSubmit={(event) => {
           void handleSubmit(event);
         }}
       >
-        <div className="grid gap-1.5">
-          <Label htmlFor="new-user-name">Name</Label>
-          <Input
-            id="new-user-name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
-              if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
-            }}
-            placeholder="Jordan Smith"
-            aria-invalid={Boolean(errors.name)}
-          />
-          {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
-        </div>
+        <div className="space-y-4 px-6 py-5">
+          <div className="grid gap-1.5">
+            <Label htmlFor="new-user-name" className="text-[13px] font-semibold">
+              Name
+            </Label>
+            <Input
+              id="new-user-name"
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+                if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
+              }}
+              placeholder="Jordan Smith"
+              aria-invalid={Boolean(errors.name)}
+              className="h-10 rounded-[10px] border-border bg-white text-[13px]"
+            />
+            {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+          </div>
 
-        <div className="grid gap-1.5">
-          <Label htmlFor="new-user-email">Email</Label>
-          <Input
-            id="new-user-email"
-            type="email"
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
-            }}
-            placeholder="jordan@young10.com"
-            aria-invalid={Boolean(errors.email)}
-          />
-          {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-        </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="new-user-email" className="text-[13px] font-semibold">
+              Email
+            </Label>
+            <Input
+              id="new-user-email"
+              type="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+              }}
+              placeholder="jordan@young10.com"
+              aria-invalid={Boolean(errors.email)}
+              className="h-10 rounded-[10px] border-border bg-white text-[13px]"
+            />
+            {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+          </div>
 
-        <div className="grid gap-1.5">
-          <Label htmlFor="new-user-password">Password</Label>
-          <Input
-            id="new-user-password"
-            type="password"
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
-            }}
-            placeholder="At least 8 characters"
-            aria-invalid={Boolean(errors.password)}
-          />
-          {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
-        </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="new-user-password" className="text-[13px] font-semibold">
+              Password
+            </Label>
+            <Input
+              id="new-user-password"
+              type="password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
+              }}
+              placeholder="At least 8 characters"
+              aria-invalid={Boolean(errors.password)}
+              className="h-10 rounded-[10px] border-border bg-white text-[13px]"
+            />
+            {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+          </div>
 
-        <div className="grid gap-1.5">
-          <Label>Role</Label>
-          <div className="flex h-9 items-center rounded-md border bg-muted/50 px-3 text-sm text-muted-foreground">
-            Sales Rep
+          <div className="grid gap-1.5">
+            <Label className="text-[13px] font-semibold">Role</Label>
+            <div className="flex h-10 items-center rounded-[10px] border border-border bg-muted/50 px-3 text-[13px] text-muted-foreground">
+              Sales Rep
+            </div>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={close} disabled={pending}>
+        <DialogFooter className="flex flex-col-reverse gap-2 border-t bg-[#FAFAFD] px-6 py-4 sm:flex-row sm:justify-end sm:gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={close}
+            disabled={pending}
+            className="rounded-[10px] border-border bg-white font-semibold hover:bg-[#F4F5FA]"
+          >
             Cancel
           </Button>
-          <Button type="submit" disabled={pending}>
+          <Button
+            type="submit"
+            disabled={pending}
+            className="rounded-[10px] bg-primary font-semibold text-white hover:bg-[#2B3AD1]"
+          >
             {pending && <Loader2 className="animate-spin" />}
             Add Member
           </Button>
@@ -211,7 +233,7 @@ function NewUserDialog() {
         if (!open) closeNewUserDialog();
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-md">
         {newUserDialogOpen && <NewUserForm close={closeNewUserDialog} />}
       </DialogContent>
     </Dialog>
@@ -244,22 +266,38 @@ function CreateKeyForm({ close }: { close: () => void }) {
   if (createdKey) {
     return (
       <>
-        <DialogHeader>
-          <DialogTitle>Key created</DialogTitle>
-          <DialogDescription>Copy the full key now. It is shown only once.</DialogDescription>
+        <DialogHeader className="gap-1 border-b px-6 py-5">
+          <DialogTitle className="text-[15px] font-bold tracking-tight">Key created</DialogTitle>
+          <DialogDescription className="text-[13px] text-muted-foreground">
+            Copy the full key now. It is shown only once.
+          </DialogDescription>
         </DialogHeader>
-        <div className="flex items-center gap-2 rounded-md border bg-muted/60 p-3">
-          <code className="min-w-0 flex-1 select-all break-all font-mono text-xs">{createdKey.key}</code>
-          <Button type="button" variant="outline" size="sm" onClick={() => void copyText(createdKey.key)}>
-            <Copy />
-            Copy
-          </Button>
+        <div className="space-y-4 px-6 py-5">
+          <div className="flex items-center gap-2 rounded-[10px] border border-border bg-[#F8F9FC] p-3">
+            <code className="min-w-0 flex-1 select-all break-all rounded-md bg-muted px-2 py-1 font-mono text-[12.5px] text-foreground">
+              {createdKey.key}
+            </code>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 rounded-[10px] border-border bg-white font-semibold hover:bg-[#F4F5FA]"
+              onClick={() => void copyText(createdKey.key)}
+            >
+              <Copy />
+              Copy
+            </Button>
+          </div>
+          <div className="rounded-[10px] bg-[#FEF3DF] px-3 py-2.5 text-[13px] font-medium text-[#92610A]">
+            Save this key securely — it authenticates your integrations.
+          </div>
         </div>
-        <div className="rounded-md bg-[#FEF3DF] px-3 py-2.5 text-xs text-[#92610A]">
-          Save this key securely — it authenticates your integrations.
-        </div>
-        <DialogFooter>
-          <Button type="button" onClick={close}>
+        <DialogFooter className="flex flex-col-reverse gap-2 border-t bg-[#FAFAFD] px-6 py-4 sm:flex-row sm:justify-end sm:gap-3">
+          <Button
+            type="button"
+            onClick={close}
+            className="rounded-[10px] bg-primary font-semibold text-white hover:bg-[#2B3AD1]"
+          >
             Done
           </Button>
         </DialogFooter>
@@ -269,35 +307,51 @@ function CreateKeyForm({ close }: { close: () => void }) {
 
   return (
     <>
-      <DialogHeader>
-        <DialogTitle>Create API Key</DialogTitle>
-        <DialogDescription>Name the key after the integration that will use it.</DialogDescription>
+      <DialogHeader className="gap-1 border-b px-6 py-5">
+        <DialogTitle className="text-[15px] font-bold tracking-tight">Create API Key</DialogTitle>
+        <DialogDescription className="text-[13px] text-muted-foreground">
+          Name the key after the integration that will use it.
+        </DialogDescription>
       </DialogHeader>
       <form
-        className="grid gap-4"
         onSubmit={(event) => {
           void handleSubmit(event);
         }}
       >
-        <div className="grid gap-1.5">
-          <Label htmlFor="api-key-name">Name</Label>
-          <Input
-            id="api-key-name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
-              if (nameError) setNameError(false);
-            }}
-            placeholder="Website contact form"
-            aria-invalid={nameError}
-          />
-          {nameError && <p className="text-xs text-destructive">Key name is required.</p>}
+        <div className="space-y-4 px-6 py-5">
+          <div className="grid gap-1.5">
+            <Label htmlFor="api-key-name" className="text-[13px] font-semibold">
+              Name
+            </Label>
+            <Input
+              id="api-key-name"
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+                if (nameError) setNameError(false);
+              }}
+              placeholder="Website contact form"
+              aria-invalid={nameError}
+              className="h-10 rounded-[10px] border-border bg-white text-[13px]"
+            />
+            {nameError && <p className="text-xs text-destructive">Key name is required.</p>}
+          </div>
         </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={close} disabled={createApiKey.isPending}>
+        <DialogFooter className="flex flex-col-reverse gap-2 border-t bg-[#FAFAFD] px-6 py-4 sm:flex-row sm:justify-end sm:gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={close}
+            disabled={createApiKey.isPending}
+            className="rounded-[10px] border-border bg-white font-semibold hover:bg-[#F4F5FA]"
+          >
             Cancel
           </Button>
-          <Button type="submit" disabled={createApiKey.isPending}>
+          <Button
+            type="submit"
+            disabled={createApiKey.isPending}
+            className="rounded-[10px] bg-primary font-semibold text-white hover:bg-[#2B3AD1]"
+          >
             {createApiKey.isPending && <Loader2 className="animate-spin" />}
             Create Key
           </Button>
@@ -318,7 +372,7 @@ function CreateKeyDialog() {
         if (!open) closeApiKeyDialog();
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-md">
         {apiKeyDialogOpen && <CreateKeyForm close={closeApiKeyDialog} />}
       </DialogContent>
     </Dialog>
@@ -373,10 +427,12 @@ export default function AdminView({ user }: { user: SafeUser }) {
     return (
       <Card className="card-shadow mx-auto max-w-md py-10 text-center">
         <div className="flex flex-col items-center gap-3">
-          <ShieldAlert className="h-10 w-10 text-[#DC2626]" />
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FDE7E7]">
+            <ShieldAlert className="h-6 w-6 text-[#DC2626]" />
+          </span>
           <div>
-            <h2 className="text-lg font-semibold">Admins only</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h2 className="text-lg font-bold tracking-tight">Admins only</h2>
+            <p className="mt-1 text-[13px] text-muted-foreground">
               This area manages team members and integration keys. Ask a workspace admin if you need access.
             </p>
           </div>
@@ -388,28 +444,32 @@ export default function AdminView({ user }: { user: SafeUser }) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#384BFE]">ADMINISTRATION</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Admin Console</h1>
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">ADMINISTRATION</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Admin Console</h1>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="h-auto w-full justify-start gap-6 rounded-none border-b bg-transparent p-0">
-          <TabsTrigger value="team" className={UNDERLINE_TRIGGER}>
+        <TabsList className="h-9 w-fit justify-start rounded-[10px] border border-border bg-white p-1 shadow-none">
+          <TabsTrigger value="team" className={SEGMENT_TRIGGER}>
             Team
           </TabsTrigger>
-          <TabsTrigger value="api-keys" className={UNDERLINE_TRIGGER}>
+          <TabsTrigger value="api-keys" className={SEGMENT_TRIGGER}>
             API Keys
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="team" className="mt-4">
+        <TabsContent value="team" className="mt-5">
           <Card className="card-shadow gap-0 overflow-hidden py-0">
             <div className="flex items-center justify-between border-b px-6 py-4">
               <div>
-                <h2 className="text-sm font-semibold">Members</h2>
-                <p className="text-xs text-muted-foreground">Manage roles and access for your workspace.</p>
+                <h2 className="text-[15px] font-bold tracking-tight">Members</h2>
+                <p className="text-[13px] text-muted-foreground">Manage roles and access for your workspace.</p>
               </div>
-              <Button size="sm" onClick={openNewUserDialog}>
+              <Button
+                size="sm"
+                onClick={openNewUserDialog}
+                className="rounded-[10px] bg-primary font-semibold text-white hover:bg-[#2B3AD1]"
+              >
                 <UserPlus />
                 Add Member
               </Button>
@@ -423,27 +483,35 @@ export default function AdminView({ user }: { user: SafeUser }) {
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="px-6">Member</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="px-6">Joined</TableHead>
+                <TableHeader className="bg-[#F8F9FC]">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="px-6 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Member
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Role
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Status
+                    </TableHead>
+                    <TableHead className="px-6 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Joined
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(members ?? []).map((member) => {
                     const isSelf = member.id === user.id;
                     return (
-                      <TableRow key={member.id}>
+                      <TableRow key={member.id} className="hover:bg-[#F7F8FC]">
                         <TableCell className="px-6">
                           <div className="flex items-center gap-3">
                             <UserAvatar name={member.name} />
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="truncate text-sm font-medium">{member.name}</span>
+                                <span className="truncate text-sm font-semibold">{member.name}</span>
                                 {isSelf && (
-                                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
                                     You
                                   </span>
                                 )}
@@ -457,10 +525,10 @@ export default function AdminView({ user }: { user: SafeUser }) {
                             <Badge
                               variant="outline"
                               className={cn(
-                                'border-transparent font-medium',
+                                'border-transparent font-semibold',
                                 member.role === 'ADMIN'
-                                  ? 'bg-[#384BFE] text-white'
-                                  : 'bg-[#EAEFFF] text-[#384BFE]',
+                                  ? 'bg-[#EEF0FF] text-primary'
+                                  : 'bg-muted text-muted-foreground',
                               )}
                             >
                               {ROLE_META[member.role].label}
@@ -493,14 +561,22 @@ export default function AdminView({ user }: { user: SafeUser }) {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Switch
-                            checked={member.active}
-                            disabled={isSelf || updateUser.isPending}
-                            onCheckedChange={(checked) => void handleToggleActive(member, checked)}
-                            aria-label={`Toggle active for ${member.name}`}
-                          />
+                          <div className="flex items-center gap-2.5">
+                            <span
+                              className={cn(
+                                'h-2 w-2 shrink-0 rounded-full',
+                                member.active ? 'bg-[#16A34A]' : 'bg-[#C6C9D4]',
+                              )}
+                            />
+                            <Switch
+                              checked={member.active}
+                              disabled={isSelf || updateUser.isPending}
+                              onCheckedChange={(checked) => void handleToggleActive(member, checked)}
+                              aria-label={`Toggle active for ${member.name}`}
+                            />
+                          </div>
                         </TableCell>
-                        <TableCell className="px-6 text-muted-foreground">{formatDate(member.createdAt)}</TableCell>
+                        <TableCell className="px-6 text-[13px] text-muted-foreground">{formatDate(member.createdAt)}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -508,39 +584,36 @@ export default function AdminView({ user }: { user: SafeUser }) {
               </Table>
             )}
 
-            <div className="border-t px-6 py-3 text-xs text-muted-foreground">
+            <div className="border-t bg-[#FAFAFD] px-6 py-3 text-[13px] text-muted-foreground">
               The first registered account is the workspace owner.
             </div>
           </Card>
         </TabsContent>
 
-        <TabsContent value="api-keys" className="mt-4 flex flex-col gap-4">
-          <Card className="card-shadow gap-0 overflow-hidden border-[#384BFE]/20 bg-[#EAEFFF]/60 py-0">
-            <div className="p-4">
+        <TabsContent value="api-keys" className="mt-5 flex flex-col gap-5">
+          <Card className="card-shadow gap-0 overflow-hidden py-0">
+            <div className="p-5">
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-[#384BFE]" />
-                <h2 className="text-sm font-semibold">External Lead Capture API</h2>
+                <Globe className="h-4 w-4 text-primary" />
+                <h2 className="text-[15px] font-bold tracking-tight">External Lead Capture API</h2>
               </div>
-              <p className="mt-1.5 text-sm text-[#26309C]/80">
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
                 Push leads from website forms and landing pages straight into the pipeline. Send a POST request to{' '}
-                <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-xs">POST /api/v1/leads/ingest</code>{' '}
+                <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[12px] text-foreground">POST /api/v1/leads/ingest</code>{' '}
                 with an{' '}
-                <code className="rounded bg-white/70 px-1 py-0.5 font-mono text-xs">x-api-key</code> header. The JSON
+                <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[12px] text-foreground">x-api-key</code> header. The JSON
                 body accepts firstName, lastName, email, phone, company, source, notes and value. Rate limit: 30
                 requests per minute.
               </p>
               <div className="relative mt-3">
-                <pre
-                  className="overflow-x-auto rounded-lg p-3 pr-16 font-mono text-xs leading-relaxed text-[#E6E8F2]"
-                  style={{ backgroundColor: '#0F0D1D' }}
-                >
+                <pre className="overflow-x-auto rounded-[10px] border border-border bg-[#F8F9FC] p-3 pr-16 font-mono text-[12.5px] leading-relaxed text-foreground">
                   {CURL_SNIPPET}
                 </pre>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="absolute right-2 top-2 h-7 gap-1.5 px-2 text-[#E6E8F2] hover:bg-white/10 hover:text-white"
+                  className="absolute right-2 top-2 h-7 gap-1.5 rounded-[10px] border-border bg-white px-2 text-[12px] font-semibold text-muted-foreground shadow-none hover:bg-[#F4F5FA] hover:text-foreground"
                   onClick={() => void copyText(CURL_SNIPPET)}
                 >
                   <Copy className="h-3.5 w-3.5" />
@@ -553,10 +626,14 @@ export default function AdminView({ user }: { user: SafeUser }) {
           <Card className="card-shadow gap-0 overflow-hidden py-0">
             <div className="flex items-center justify-between border-b px-6 py-4">
               <div>
-                <h2 className="text-sm font-semibold">API Keys</h2>
-                <p className="text-xs text-muted-foreground">Keys authenticate server-to-server lead ingestion.</p>
+                <h2 className="text-[15px] font-bold tracking-tight">API Keys</h2>
+                <p className="text-[13px] text-muted-foreground">Keys authenticate server-to-server lead ingestion.</p>
               </div>
-              <Button size="sm" onClick={openApiKeyDialog}>
+              <Button
+                size="sm"
+                onClick={openApiKeyDialog}
+                className="rounded-[10px] bg-primary font-semibold text-white hover:bg-[#2B3AD1]"
+              >
                 <KeyRound />
                 Create Key
               </Button>
@@ -569,44 +646,60 @@ export default function AdminView({ user }: { user: SafeUser }) {
                 ))}
               </div>
             ) : (apiKeys ?? []).length === 0 ? (
-              <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-                <KeyRound className="h-10 w-10 text-muted-foreground/40" />
-                <p className="text-sm font-medium">No API keys yet</p>
-                <p className="text-xs text-muted-foreground">
+              <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF0FF]">
+                  <KeyRound className="h-6 w-6 text-primary" />
+                </span>
+                <p className="text-[15px] font-bold tracking-tight">No API keys yet</p>
+                <p className="text-[13px] text-muted-foreground">
                   Create a key to start receiving leads from your website forms.
                 </p>
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="px-6">Name</TableHead>
-                    <TableHead>Key</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last used</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="px-6 text-right">Actions</TableHead>
+                <TableHeader className="bg-[#F8F9FC]">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="px-6 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Name
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Key
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Last used
+                    </TableHead>
+                    <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Created
+                    </TableHead>
+                    <TableHead className="px-6 text-right text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(apiKeys ?? []).map((apiKey) => {
                     const isRevealed = revealed[apiKey.id] ?? false;
                     return (
-                      <TableRow key={apiKey.id}>
+                      <TableRow key={apiKey.id} className="hover:bg-[#F7F8FC]">
                         <TableCell className="px-6">
-                          <div className="text-sm font-medium">{apiKey.name}</div>
-                          <div className="font-mono text-xs text-muted-foreground">{apiKey.prefix}</div>
+                          <div className="text-sm font-semibold">{apiKey.name}</div>
+                          <code className="mt-1 inline-block rounded-md bg-muted px-2 py-1 font-mono text-[12.5px] text-muted-foreground">
+                            {apiKey.prefix}
+                          </code>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1.5">
-                            <code className="max-w-[180px] truncate font-mono text-xs text-muted-foreground">
+                            <code className="max-w-[180px] truncate rounded-md bg-muted px-2 py-1 font-mono text-[12.5px] text-foreground">
                               {isRevealed ? apiKey.key : `${apiKey.prefix}${KEY_MASK_SUFFIX}`}
                             </code>
                             <Button
                               type="button"
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
-                              className="h-7 w-7"
+                              className="h-7 w-7 rounded-[10px] border-border bg-white text-muted-foreground shadow-none hover:bg-[#F4F5FA] hover:text-foreground"
                               aria-label={isRevealed ? 'Hide key' : 'Reveal key'}
                               onClick={() =>
                                 setRevealed((prev) => ({ ...prev, [apiKey.id]: !isRevealed }))
@@ -616,9 +709,9 @@ export default function AdminView({ user }: { user: SafeUser }) {
                             </Button>
                             <Button
                               type="button"
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
-                              className="h-7 w-7"
+                              className="h-7 w-7 rounded-[10px] border-border bg-white text-muted-foreground shadow-none hover:bg-[#F4F5FA] hover:text-foreground"
                               aria-label="Copy key"
                               onClick={() => void copyText(apiKey.key)}
                             >
@@ -630,21 +723,26 @@ export default function AdminView({ user }: { user: SafeUser }) {
                           <Badge
                             variant="outline"
                             className={cn(
-                              'border-transparent font-medium',
+                              'border-transparent font-semibold',
                               apiKey.active ? 'bg-[#E4F7EC] text-[#166534]' : 'bg-[#FDE7E7] text-[#DC2626]',
                             )}
                           >
                             {apiKey.active ? 'Active' : 'Revoked'}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-[13px] text-muted-foreground">
                           {apiKey.lastUsedAt ? formatRelative(apiKey.lastUsedAt) : 'Never'}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{formatDate(apiKey.createdAt)}</TableCell>
+                        <TableCell className="text-[13px] text-muted-foreground">{formatDate(apiKey.createdAt)}</TableCell>
                         <TableCell className="px-6 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Key actions">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:bg-[#F4F5FA] hover:text-foreground"
+                                aria-label="Key actions"
+                              >
                                 <MoreVertical className="h-3.5 w-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -673,18 +771,20 @@ export default function AdminView({ user }: { user: SafeUser }) {
       <CreateKeyDialog />
 
       <AlertDialog open={revoking !== null} onOpenChange={(open) => { if (!open) setRevoking(null); }}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Revoke API key</AlertDialogTitle>
+            <AlertDialogTitle className="font-bold tracking-tight">Revoke API key</AlertDialogTitle>
             <AlertDialogDescription>
               Integrations using {revoking ? `"${revoking.name}"` : 'this key'} will stop receiving leads immediately.
               This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-[10px] border-border bg-white font-semibold hover:bg-[#F4F5FA]">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="rounded-[10px] bg-[#DC2626] font-semibold text-white hover:bg-[#B91C1C]"
               onClick={() => void handleRevoke()}
             >
               Revoke Key

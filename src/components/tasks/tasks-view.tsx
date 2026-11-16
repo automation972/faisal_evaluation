@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   Building2,
   Calendar,
+  Check,
   CheckCircle2,
   MoreVertical,
   Pencil,
@@ -63,13 +64,16 @@ type StatusTab = TaskStatusValue | 'ALL';
 type PriorityFilter = TaskPriorityValue | 'ALL';
 type DueTone = 'overdue' | 'today' | 'plain';
 
-const CHIP_BASE = 'inline-flex items-center gap-1.5 rounded-full border border-transparent px-3 py-1.5 text-sm';
+const CHIP_BASE = 'inline-flex items-center gap-1.5 rounded-full border border-transparent px-2.5 py-1 text-[12px] font-medium';
 
 const DUE_TONE_CLASSES: Record<DueTone, string> = {
   overdue: 'bg-[#FDE7E7] text-[#DC2626]',
   today: 'bg-[#FEF3DF] text-[#B45309]',
   plain: 'bg-muted text-muted-foreground',
 };
+
+const SEGMENT_TRIGGER =
+  'h-7 rounded-[7px] border-transparent px-3 text-[13px] font-medium text-[#5F6274] shadow-none hover:bg-[#F4F5FA] data-[state=active]:bg-[#EEF0FF] data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=active]:shadow-none';
 
 function dueChip(task: SafeTask): { label: string; tone: DueTone } | null {
   if (!task.dueDate) return null;
@@ -106,7 +110,7 @@ function StatChip({ label, count, className, icon }: { label: string; count: num
     <span className={cn(CHIP_BASE, className)}>
       {icon}
       {label}
-      <span className="font-semibold">{count}</span>
+      <span className="font-bold">{count}</span>
     </span>
   );
 }
@@ -126,18 +130,25 @@ function TaskRow({ task, toggling, onToggle, onEdit, onDelete, onOpenLead }: Tas
   const lead = task.lead;
 
   return (
-    <div className="flex items-start gap-3 p-4">
+    <div
+      className={cn(
+        'flex items-start gap-3 p-4 transition-colors hover:bg-[#F7F8FC]',
+        completed && 'opacity-70',
+      )}
+    >
       <button
         type="button"
         aria-label={completed ? 'Mark task as pending' : 'Mark task as completed'}
         disabled={toggling}
         onClick={() => onToggle(task)}
         className={cn(
-          'mt-0.5 shrink-0 transition-colors',
-          completed ? 'text-[#16A34A] hover:text-[#15803D]' : 'text-muted-foreground/50 hover:text-foreground',
+          'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors',
+          completed
+            ? 'border-primary bg-primary text-white hover:bg-[#2B3AD1]'
+            : 'border-[#C6C9D4] bg-white text-transparent hover:border-primary/50 hover:bg-[#EEF0FF]',
         )}
       >
-        <CheckCircle2 className={cn('h-5 w-5', toggling && 'animate-pulse')} />
+        <Check className={cn('h-3.5 w-3.5', toggling && 'animate-pulse')} />
       </button>
 
       <div className="min-w-0 flex-1">
@@ -149,7 +160,7 @@ function TaskRow({ task, toggling, onToggle, onEdit, onDelete, onOpenLead }: Tas
           {due && (
             <span
               className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold',
                 DUE_TONE_CLASSES[due.tone],
               )}
             >
@@ -161,7 +172,7 @@ function TaskRow({ task, toggling, onToggle, onEdit, onDelete, onOpenLead }: Tas
             <button
               type="button"
               onClick={() => onOpenLead(lead.id)}
-              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-[#EEF0FF] hover:text-primary"
             >
               <Building2 className="h-3 w-3" />
               {lead.firstName} {lead.lastName}
@@ -179,7 +190,12 @@ function TaskRow({ task, toggling, onToggle, onEdit, onDelete, onOpenLead }: Tas
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" aria-label="Task actions">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-[#F4F5FA] hover:text-foreground"
+            aria-label="Task actions"
+          >
             <MoreVertical />
           </Button>
         </DropdownMenuTrigger>
@@ -249,10 +265,13 @@ export default function TasksView({ user }: { user: SafeUser }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#384BFE]">EXECUTION</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Tasks &amp; Follow-ups</h1>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">EXECUTION</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Tasks &amp; Follow-ups</h1>
         </div>
-        <Button onClick={() => openTaskDialog(null)}>
+        <Button
+          onClick={() => openTaskDialog(null)}
+          className="rounded-[10px] bg-primary font-semibold text-white hover:bg-[#2B3AD1]"
+        >
           <Plus />
           New Task
         </Button>
@@ -260,7 +279,7 @@ export default function TasksView({ user }: { user: SafeUser }) {
 
       <div className="flex flex-wrap items-center gap-2">
         <StatChip label="Pending" count={counts?.pending ?? 0} className="bg-muted text-muted-foreground" />
-        <StatChip label="In Progress" count={counts?.inProgress ?? 0} className="bg-[#EAEFFF] text-[#384BFE]" />
+        <StatChip label="In Progress" count={counts?.inProgress ?? 0} className="bg-[#EAEFFF] text-primary" />
         {counts && counts.overdue > 0 && (
           <StatChip
             label="Overdue"
@@ -274,10 +293,12 @@ export default function TasksView({ user }: { user: SafeUser }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs value={statusTab} onValueChange={(value) => setStatusTab(value as StatusTab)}>
-          <TabsList>
-            <TabsTrigger value="ALL">All</TabsTrigger>
+          <TabsList className="h-9 rounded-[10px] border border-border bg-white p-1 shadow-none">
+            <TabsTrigger value="ALL" className={SEGMENT_TRIGGER}>
+              All
+            </TabsTrigger>
             {TASK_STATUSES.map((status) => (
-              <TabsTrigger key={status} value={status}>
+              <TabsTrigger key={status} value={status} className={SEGMENT_TRIGGER}>
                 {TASK_STATUS_META[status].label}
               </TabsTrigger>
             ))}
@@ -286,7 +307,10 @@ export default function TasksView({ user }: { user: SafeUser }) {
 
         <div className="flex flex-wrap items-center gap-4">
           <Select value={priority} onValueChange={(value) => setPriority(value as PriorityFilter)}>
-            <SelectTrigger className="w-[160px]" aria-label="Filter by priority">
+            <SelectTrigger
+              className="h-10 w-[160px] rounded-[10px] border-border bg-white text-[13px] shadow-none"
+              aria-label="Filter by priority"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -312,7 +336,7 @@ export default function TasksView({ user }: { user: SafeUser }) {
       {isLoading ? (
         <Card className="card-shadow gap-0 overflow-hidden py-0">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className={cn('flex items-center gap-4 p-4', index > 0 && 'border-t')}>
+            <div key={index} className={cn('flex items-center gap-4 p-4', index > 0 && 'border-t border-border/60')}>
               <Skeleton className="h-5 w-5 rounded-full" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-1/3" />
@@ -324,16 +348,18 @@ export default function TasksView({ user }: { user: SafeUser }) {
         </Card>
       ) : tasks.length === 0 ? (
         <Card className="card-shadow items-center py-14 text-center">
-          <div className="flex flex-col items-center gap-2">
-            <CheckCircle2 className="h-10 w-10 text-muted-foreground/40" />
-            <p className="text-sm font-medium">All caught up</p>
-            <p className="text-xs text-muted-foreground">
+          <div className="flex flex-col items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EEF0FF]">
+              <CheckCircle2 className="h-6 w-6 text-primary" />
+            </span>
+            <p className="text-[15px] font-bold tracking-tight">All caught up</p>
+            <p className="max-w-sm text-[13px] text-muted-foreground">
               No tasks match the current filters. Create a new task or adjust the filters to see more.
             </p>
           </div>
         </Card>
       ) : (
-        <Card className="card-shadow divide-y gap-0 overflow-hidden py-0">
+        <Card className="card-shadow divide-y divide-border/60 gap-0 overflow-hidden py-0">
           {tasks.map((task) => (
             <TaskRow
               key={task.id}
@@ -351,17 +377,19 @@ export default function TasksView({ user }: { user: SafeUser }) {
       <TaskFormDialog />
 
       <AlertDialog open={deleting !== null} onOpenChange={(open) => { if (!open) setDeleting(null); }}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete task</AlertDialogTitle>
+            <AlertDialogTitle className="font-bold tracking-tight">Delete task</AlertDialogTitle>
             <AlertDialogDescription>
               This permanently removes {deleting?.title ? `"${deleting.title}"` : 'this task'} from your workspace.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-[10px] border-border bg-white font-semibold hover:bg-[#F4F5FA]">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="rounded-[10px] bg-[#DC2626] font-semibold text-white hover:bg-[#B91C1C]"
               onClick={() => void handleDelete()}
             >
               Delete

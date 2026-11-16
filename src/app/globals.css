@@ -55,12 +55,12 @@
 }
 
 /*
-  Young10 Marketing brand system
-  - Brand blue  #384BFE  (site --theme)
-  - Ink / dark  #0F0D1D  (header & dark sections)
-  - Logo black  #1E1B1C
-  - Text gray   #7A7A7A
-  - Surface     #FAFAFA
+  Young10 Marketing brand system (extracted from young10marketing.com)
+  - Brand blue   #384BFE  (logo & CTAs)
+  - Ink / dark   #0F0D1D  (top bar & dark sections on the site)
+  - Logo black   #1E1B1C
+  - Text gray    #7A7A7A
+  - Page tint    #F5F6FB  (cool light gray)
 */
 :root {
   --radius: 0.75rem;
@@ -77,13 +77,13 @@
   --primary-foreground: #ffffff;
   --secondary: #eaefff;
   --secondary-foreground: #26309c;
-  --muted: #f4f5fb;
+  --muted: #f4f5fa;
   --muted-foreground: #7a7a7a;
   --accent: #eaefff;
   --accent-foreground: #26309c;
   --destructive: #dc2626;
-  --border: #e6e8f2;
-  --input: #e2e5ef;
+  --border: #e8eaf1;
+  --input: #dfe2ee;
   --ring: #384bfe;
   --success: #16a34a;
   --success-soft: #e4f7ec;
@@ -95,16 +95,17 @@
   --info-soft: #e2f7fa;
   --chart-1: #384bfe;
   --chart-2: #0ea5b7;
-  --chart-3: #7c3aed;
+  --chart-3: #16a34a;
   --chart-4: #f59e0b;
-  --chart-5: #16a34a;
-  --sidebar: #0f0d1d;
-  --sidebar-foreground: #b6b8cf;
+  --chart-5: #8b5cf6;
+  /* Light sidebar - matches the clean white site header */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #5f6274;
   --sidebar-primary: #384bfe;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1d1b2e;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #262439;
+  --sidebar-accent: #eef0ff;
+  --sidebar-accent-foreground: #384bfe;
+  --sidebar-border: #eceef5;
   --sidebar-ring: #384bfe;
 }
 
@@ -127,12 +128,6 @@
   --border: #2b2940;
   --input: #2b2940;
   --ring: #5a68ff;
-  --sidebar: #14121f;
-  --sidebar-foreground: #b6b8cf;
-  --sidebar-accent: #262439;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #2b2940;
-  --sidebar-ring: #5a68ff;
 }
 
 @layer base {
@@ -141,29 +136,43 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "cv02", "cv03";
+    font-feature-settings: "ss01";
   }
   ::selection {
-    background: rgba(56, 75, 254, 0.18);
+    background: rgba(56, 75, 254, 0.16);
   }
 }
 
 /* Brand helpers ---------------------------------------------------------------- */
 
-.brand-gradient {
-  background: linear-gradient(135deg, #384bfe 0%, #5a68ff 55%, #7c3aed 130%);
+/* Soft elevation used on every white card in the app */
+.card-shadow {
+  box-shadow:
+    0 1px 2px rgba(16, 18, 35, 0.05),
+    0 10px 28px -14px rgba(16, 18, 35, 0.1);
 }
 
-.ink-gradient {
-  background: linear-gradient(160deg, #0f0d1d 0%, #171429 60%, #1d1b3a 100%);
+/* Deeper float used on the auth card */
+.card-float {
+  box-shadow:
+    0 1px 2px rgba(16, 18, 35, 0.04),
+    0 32px 72px -28px rgba(31, 34, 78, 0.28);
+}
+
+.brand-shadow {
+  box-shadow: 0 10px 24px -10px rgba(56, 75, 254, 0.55);
 }
 
 .brand-ring {
   box-shadow: 0 0 0 1px rgba(56, 75, 254, 0.25), 0 8px 30px -6px rgba(56, 75, 254, 0.45);
 }
 
-.card-shadow {
-  box-shadow: 0 1px 2px rgba(16, 18, 35, 0.04), 0 8px 24px -12px rgba(16, 18, 35, 0.12);
+.ink-gradient {
+  background: linear-gradient(160deg, #0f0d1d 0%, #171429 60%, #1d1b3a 100%);
+}
+
+.brand-gradient {
+  background: linear-gradient(135deg, #384bfe 0%, #5a68ff 55%, #7c3aed 130%);
 }
 
 .text-gradient-brand {
@@ -173,11 +182,19 @@
   color: transparent;
 }
 
+/* Lavender wash behind the sign-in screen (matches the site hero) */
+.auth-wash {
+  background:
+    radial-gradient(52rem 36rem at 8% -12%, rgba(56, 75, 254, 0.07), transparent 60%),
+    radial-gradient(46rem 34rem at 108% 118%, rgba(124, 58, 237, 0.06), transparent 55%),
+    linear-gradient(155deg, #f3f3fc 0%, #f7f7fd 48%, #f2f3fb 100%);
+}
+
 /* Custom scrollbars ------------------------------------------------------------ */
 
 .scrollbar-slim {
   scrollbar-width: thin;
-  scrollbar-color: #c3c8e6 transparent;
+  scrollbar-color: #c8ccdf transparent;
 }
 .scrollbar-slim::-webkit-scrollbar {
   width: 6px;
@@ -187,7 +204,7 @@
   background: transparent;
 }
 .scrollbar-slim::-webkit-scrollbar-thumb {
-  background-color: #c3c8e6;
+  background-color: #c8ccdf;
   border-radius: 999px;
 }
 .scrollbar-slim::-webkit-scrollbar-thumb:hover {
@@ -208,12 +225,7 @@
   border-radius: 999px;
 }
 
-/* Pinwheel backdrop used on the auth screen ------------------------------------ */
-
-.pinwheel-field {
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.14) 1px, transparent 0);
-  background-size: 26px 26px;
-}
+/* Motion ----------------------------------------------------------------------- */
 
 @keyframes float-slow {
   0%,

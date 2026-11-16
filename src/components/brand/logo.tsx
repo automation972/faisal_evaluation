@@ -1,70 +1,53 @@
-// Young10 Marketing brand mark - pinwheel recreated from the company icon
-// (extracted brand colors: blue #384BFE, ink #1E1B1C)
+// Young10 Marketing - official logo assets
+// logo.png / logo-white.png are the original wordmarks from young10marketing.com
+// mark.png is the pinwheel brand symbol (2 blue + 2 ink arms)
+
+'use client';
+
+import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Pinwheel brand symbol.
+ */
 export function LogoMark({ className, size = 40 }: { className?: string; size?: number }) {
   return (
-    <svg
-      viewBox="0 0 100 100"
+    <Image
+      src="/brand/mark.png"
+      alt="Young10 Marketing pinwheel mark"
       width={size}
       height={size}
-      className={cn('shrink-0', className)}
-      role="img"
-      aria-label="Young10 Marketing logo"
-    >
-      <g>
-        <g transform="rotate(-45 50 50)">
-          <rect x="55" y="43.5" width="32" height="13" rx="2.5" fill="#384BFE" />
-        </g>
-        <g transform="rotate(135 50 50)">
-          <rect x="55" y="43.5" width="32" height="13" rx="2.5" fill="#384BFE" />
-        </g>
-        <g transform="rotate(45 50 50)">
-          <rect x="55" y="43.5" width="32" height="13" rx="2.5" fill="#1E1B1C" />
-        </g>
-        <g transform="rotate(225 50 50)">
-          <rect x="55" y="43.5" width="32" height="13" rx="2.5" fill="#1E1B1C" />
-        </g>
-        <rect x="45.75" y="45.75" width="8.5" height="8.5" rx="1.5" transform="rotate(45 50 50)" fill="#ffffff" />
-      </g>
-    </svg>
+      priority
+      className={cn('shrink-0 select-none', className)}
+      style={{ width: size, height: size }}
+    />
   );
 }
 
 /**
- * Full logo: pinwheel mark + wordmark.
- * variant "light" = ink text for light surfaces; "white" = white text for dark surfaces.
+ * Full official wordmark: "Young10 MARKETING" with pinwheel.
+ * variant "light" = ink "Young" for light surfaces; "white" = white "Young" for dark surfaces.
  */
 export function Logo({
   variant = 'light',
-  size = 34,
+  height = 34,
   className,
 }: {
   variant?: 'light' | 'white';
-  size?: number;
+  height?: number;
   className?: string;
 }) {
-  const primary = variant === 'light' ? '#101223' : '#FFFFFF';
+  const width = Math.round(height * (395 / 176));
   return (
-    <span className={cn('inline-flex items-center gap-2.5', className)}>
-      <LogoMark size={size} />
-      <span
-        className="font-bold leading-none tracking-tight"
-        style={{ color: primary, fontSize: size * 0.62 }}
-      >
-        Young<span style={{ color: '#384BFE' }}>10</span>
-        <span
-          className="font-medium"
-          style={{
-            color: variant === 'light' ? '#7A7A7A' : '#9EA0BC',
-            fontSize: size * 0.5,
-            marginLeft: size * 0.18,
-          }}
-        >
-          Marketing
-        </span>
-      </span>
-    </span>
+    <Image
+      src={variant === 'light' ? '/brand/logo.png' : '/brand/logo-white.png'}
+      alt="Young10 Marketing"
+      width={width}
+      height={height}
+      priority
+      className={cn('shrink-0 select-none', className)}
+      style={{ width: width, height: 'auto' }}
+    />
   );
 }

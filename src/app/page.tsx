@@ -38,7 +38,7 @@ function CrmWorkspace() {
   if (!user) return <AuthScreen />;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#FAFAFA]">
+    <div className="flex h-screen overflow-hidden bg-[#F5F6FB]">
       <DesktopSidebar user={user} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -55,13 +55,13 @@ function CrmWorkspace() {
           {view === 'admin' && <AdminView user={user} />}
         </main>
 
-        <footer className="flex shrink-0 items-center justify-between border-t bg-white px-4 py-2.5 text-xs text-muted-foreground md:px-8">
+        <footer className="flex shrink-0 items-center justify-between border-t border-[#ECEEF5] bg-white px-4 py-2.5 text-xs text-muted-foreground md:px-8">
           <span>
             <span className="font-semibold text-foreground">Y10 CRM</span>
             <span className="mx-2 text-border">|</span>
             © {new Date().getFullYear()} Young10 Marketing
           </span>
-          <span className="hidden sm:block">Live data from PostgreSQL</span>
+          <span className="hidden sm:block">Live data · PostgreSQL</span>
         </footer>
       </div>
 

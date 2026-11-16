@@ -123,9 +123,11 @@ function TaskFormFields({ editing, closeTaskDialog }: TaskFormFieldsProps) {
 
   return (
     <>
-      <DialogHeader>
-        <DialogTitle>{editing ? 'Edit Task' : 'New Task'}</DialogTitle>
-        <DialogDescription>
+      <DialogHeader className="gap-1 border-b px-6 py-5">
+        <DialogTitle className="text-[15px] font-bold tracking-tight">
+          {editing ? 'Edit Task' : 'New Task'}
+        </DialogTitle>
+        <DialogDescription className="text-[13px] text-muted-foreground">
           {editing
             ? 'Update the details of this task.'
             : 'Track a follow-up and keep execution on schedule.'}
@@ -133,121 +135,158 @@ function TaskFormFields({ editing, closeTaskDialog }: TaskFormFieldsProps) {
       </DialogHeader>
 
       <form
-        className="grid gap-4"
         onSubmit={(event) => {
           void handleSubmit(event);
         }}
       >
-        <div className="grid gap-1.5">
-          <Label htmlFor="task-title">Title</Label>
-          <Input
-            id="task-title"
-            value={title}
-            onChange={(event) => {
-              setTitle(event.target.value);
-              if (titleError) setTitleError(false);
-            }}
-            placeholder="Follow up with Acme about the proposal"
-            aria-invalid={titleError}
-          />
-          {titleError && <p className="text-xs text-destructive">Title must be at least 2 characters.</p>}
-        </div>
-
-        <div className="grid gap-1.5">
-          <Label htmlFor="task-description">Description</Label>
-          <Textarea
-            id="task-description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="Optional context, links or next steps"
-            rows={3}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4 px-6 py-5">
           <div className="grid gap-1.5">
-            <Label htmlFor="task-due">Due date</Label>
-            <Input id="task-due" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
+            <Label htmlFor="task-title" className="text-[13px] font-semibold">
+              Title
+            </Label>
+            <Input
+              id="task-title"
+              value={title}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                if (titleError) setTitleError(false);
+              }}
+              placeholder="Follow up with Acme about the proposal"
+              aria-invalid={titleError}
+              className="h-10 rounded-[10px] border-border bg-white text-[13px]"
+            />
+            {titleError && <p className="text-xs text-destructive">Title must be at least 2 characters.</p>}
           </div>
+
           <div className="grid gap-1.5">
-            <Label>Priority</Label>
-            <Select value={priority} onValueChange={(value) => setPriority(value as TaskPriorityValue)}>
-              <SelectTrigger className="w-full" aria-label="Priority">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TASK_PRIORITIES.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {PRIORITY_META[p].label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="task-description" className="text-[13px] font-semibold">
+              Description
+            </Label>
+            <Textarea
+              id="task-description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Optional context, links or next steps"
+              rows={3}
+              className="rounded-[10px] border-border bg-white text-[13px]"
+            />
           </div>
-        </div>
 
-        {editing && (
-          <div className="grid gap-1.5">
-            <Label>Status</Label>
-            <Select value={status} onValueChange={(value) => setStatus(value as TaskStatusValue)}>
-              <SelectTrigger className="w-full" aria-label="Status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TASK_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {TASK_STATUS_META[s].label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        <div className="grid gap-1.5">
-          <Label>Related lead</Label>
-          <Select value={leadId} onValueChange={setLeadId}>
-            <SelectTrigger className="w-full" aria-label="Related lead">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NONE_LEAD}>None</SelectItem>
-              {(leadsResult?.leads ?? []).map((lead) => (
-                <SelectItem key={lead.id} value={lead.id}>
-                  {lead.firstName} {lead.lastName}
-                  {lead.company ? ` — ${lead.company}` : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {isAdmin && (
-          <div className="grid gap-1.5">
-            <Label>Assigned to</Label>
-            <Select value={assignedToId} onValueChange={setAssignedToId}>
-              <SelectTrigger className="w-full" aria-label="Assigned to">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ME_USER}>Me</SelectItem>
-                {(users ?? [])
-                  .filter((u) => u.id !== me?.id)
-                  .map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.name}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-1.5">
+              <Label htmlFor="task-due" className="text-[13px] font-semibold">
+                Due date
+              </Label>
+              <Input
+                id="task-due"
+                type="date"
+                value={dueDate}
+                onChange={(event) => setDueDate(event.target.value)}
+                className="h-10 rounded-[10px] border-border bg-white text-[13px]"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-semibold">Priority</Label>
+              <Select value={priority} onValueChange={(value) => setPriority(value as TaskPriorityValue)}>
+                <SelectTrigger
+                  className="h-10 w-full rounded-[10px] border-border bg-white text-[13px] shadow-none"
+                  aria-label="Priority"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TASK_PRIORITIES.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {PRIORITY_META[p].label}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {editing && (
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-semibold">Status</Label>
+              <Select value={status} onValueChange={(value) => setStatus(value as TaskStatusValue)}>
+                <SelectTrigger
+                  className="h-10 w-full rounded-[10px] border-border bg-white text-[13px] shadow-none"
+                  aria-label="Status"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TASK_STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {TASK_STATUS_META[s].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="grid gap-1.5">
+            <Label className="text-[13px] font-semibold">Related lead</Label>
+            <Select value={leadId} onValueChange={setLeadId}>
+              <SelectTrigger
+                className="h-10 w-full rounded-[10px] border-border bg-white text-[13px] shadow-none"
+                aria-label="Related lead"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE_LEAD}>None</SelectItem>
+                {(leadsResult?.leads ?? []).map((lead) => (
+                  <SelectItem key={lead.id} value={lead.id}>
+                    {lead.firstName} {lead.lastName}
+                    {lead.company ? ` — ${lead.company}` : ''}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-        )}
 
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={closeTaskDialog} disabled={pending}>
+          {isAdmin && (
+            <div className="grid gap-1.5">
+              <Label className="text-[13px] font-semibold">Assigned to</Label>
+              <Select value={assignedToId} onValueChange={setAssignedToId}>
+                <SelectTrigger
+                  className="h-10 w-full rounded-[10px] border-border bg-white text-[13px] shadow-none"
+                  aria-label="Assigned to"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ME_USER}>Me</SelectItem>
+                  {(users ?? [])
+                    .filter((u) => u.id !== me?.id)
+                    .map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="flex flex-col-reverse gap-2 border-t bg-[#FAFAFD] px-6 py-4 sm:flex-row sm:justify-end sm:gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeTaskDialog}
+            disabled={pending}
+            className="rounded-[10px] border-border bg-white font-semibold hover:bg-[#F4F5FA]"
+          >
             Cancel
           </Button>
-          <Button type="submit" disabled={pending}>
+          <Button
+            type="submit"
+            disabled={pending}
+            className="rounded-[10px] bg-primary font-semibold text-white hover:bg-[#2B3AD1]"
+          >
             {pending && <Loader2 className="animate-spin" />}
             {editing ? 'Save Changes' : 'Create Task'}
           </Button>
@@ -268,7 +307,7 @@ export function TaskFormDialog() {
         if (!open) closeTaskDialog();
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-md">
         {taskDialog.open && (
           <TaskFormFields
             key={taskDialog.editing?.id ?? 'create'}

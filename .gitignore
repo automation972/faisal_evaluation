@@ -57,3 +57,11 @@ shots/
 brand-assets/
 *.js.bak
 server.log
+
+# internal artifacts
+tool-results/
+upload/
+agent-ctx/
+
+# local sqlite leftover (using Neon PostgreSQL)
+db/custom.db

@@ -165,14 +165,14 @@ export default function LeadsView({ user }: { user: SafeUser }) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#384BFE]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
             Relationships
           </p>
           <h1 className="text-2xl font-bold tracking-tight">Leads</h1>
         </div>
         <Button
           onClick={() => openLeadDialog(null)}
-          className="bg-[#384BFE] text-white hover:bg-[#2B3AD1]"
+          className="h-10 rounded-[10px] bg-primary px-4 font-semibold text-white hover:bg-[#2B3AD1]"
         >
           <Plus className="size-4" />
           New Lead
@@ -180,14 +180,14 @@ export default function LeadsView({ user }: { user: SafeUser }) {
       </div>
 
       {/* Toolbar */}
-      <div className="card-shadow flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4">
+      <div className="card-shadow flex flex-wrap items-center gap-5 rounded-xl border bg-card p-5">
         <div className="relative min-w-[240px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search name, company, email, phone..."
-            className="pl-9"
+            placeholder="Search leads..."
+            className="h-10 rounded-[10px] border-border bg-white pl-9"
           />
         </div>
 
@@ -198,7 +198,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="w-[132px]">
+          <SelectTrigger className="data-[size=default]:h-10 w-[132px] rounded-[10px] border-border bg-white">
             <SelectValue placeholder="Stage" />
           </SelectTrigger>
           <SelectContent>
@@ -218,7 +218,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="data-[size=default]:h-10 w-[120px] rounded-[10px] border-border bg-white">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -238,7 +238,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="data-[size=default]:h-10 w-[150px] rounded-[10px] border-border bg-white">
             <SelectValue placeholder="Source" />
           </SelectTrigger>
           <SelectContent>
@@ -259,7 +259,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="data-[size=default]:h-10 w-[150px] rounded-[10px] border-border bg-white">
               <SelectValue placeholder="Assignee" />
             </SelectTrigger>
             <SelectContent>
@@ -281,7 +281,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="data-[size=default]:h-10 w-[150px] rounded-[10px] border-border bg-white">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent>
@@ -294,9 +294,9 @@ export default function LeadsView({ user }: { user: SafeUser }) {
       </div>
 
       {/* Table */}
-      <Card className="card-shadow gap-0 overflow-hidden p-0">
+      <Card className="card-shadow gap-0 overflow-hidden rounded-xl border bg-white p-0">
         {isLoading ? (
-          <div className="space-y-3 p-4">
+          <div className="space-y-3 px-5 py-5">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex items-center gap-4">
                 <Skeleton className="size-8 rounded-full" />
@@ -311,8 +311,8 @@ export default function LeadsView({ user }: { user: SafeUser }) {
           </div>
         ) : leads.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
-            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-              <SearchX className="size-6 text-muted-foreground" />
+            <div className="flex size-12 items-center justify-center rounded-full bg-[#EEF0FF]">
+              <SearchX className="size-6 text-primary" />
             </div>
             <p className="font-semibold">No leads found</p>
             <p className="max-w-sm text-sm text-muted-foreground">
@@ -321,7 +321,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             </p>
             <Button
               onClick={() => openLeadDialog(null)}
-              className="bg-[#384BFE] text-white hover:bg-[#2B3AD1]"
+              className="h-10 rounded-[10px] bg-primary px-4 font-semibold text-white hover:bg-[#2B3AD1]"
             >
               <Plus className="size-4" />
               Create your first lead
@@ -331,15 +331,15 @@ export default function LeadsView({ user }: { user: SafeUser }) {
           <>
             <Table>
               <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="pl-4">Lead</TableHead>
+                <TableRow className="border-b bg-[#F8F9FC] hover:bg-[#F8F9FC] [&>th]:text-[11px] [&>th]:font-bold [&>th]:uppercase [&>th]:tracking-[0.12em] [&>th]:text-muted-foreground">
+                  <TableHead className="pl-5">Lead</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Source</TableHead>
                   <TableHead>Stage</TableHead>
                   <TableHead>Value</TableHead>
                   <TableHead>Assignee</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead className="w-10 pr-4" aria-label="Actions" />
+                  <TableHead className="w-10 pr-5" aria-label="Actions" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -349,24 +349,23 @@ export default function LeadsView({ user }: { user: SafeUser }) {
                     <TableRow
                       key={lead.id}
                       onClick={() => openLeadDetail(lead.id)}
-                      className="cursor-pointer"
+                      className="cursor-pointer border-border/60 hover:bg-[#F7F8FC]"
                     >
-                      <TableCell className="pl-4">
+                      <TableCell className="pl-5">
                         <div className="flex items-center gap-3">
                           <UserAvatar name={fullName} />
                           <div className="min-w-0">
-                            <p className="truncate font-semibold">{fullName}</p>
+                            <p className="truncate font-semibold text-foreground">{fullName}</p>
                             <p className="truncate text-xs text-muted-foreground">
-                              {lead.company ?? '-'}
+                              {lead.email ?? '-'}
                             </p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-0.5 text-sm text-muted-foreground">
-                          <p className="truncate">{lead.email ?? '-'}</p>
-                          <p className="truncate">{lead.phone ?? '-'}</p>
-                        </div>
+                        <span className="block truncate text-sm text-muted-foreground">
+                          {lead.phone ?? '-'}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <SourceBadge source={lead.source} />
@@ -375,7 +374,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
                         <StageBadge stage={lead.stage} />
                       </TableCell>
                       <TableCell>
-                        <span className="font-semibold">{formatCurrency(lead.value)}</span>
+                        <span className="font-semibold tabular-nums">{formatCurrency(lead.value)}</span>
                       </TableCell>
                       <TableCell onClick={(e) => e.stopPropagation()}>
                         {isAdmin ? (
@@ -385,7 +384,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
                           >
                             <SelectTrigger
                               size="sm"
-                              className="h-8 w-[150px] bg-background"
+                              className="data-[size=sm]:h-9 w-[150px] rounded-[10px] border-border bg-white"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <SelectValue placeholder="Unassigned" />
@@ -411,7 +410,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDate(lead.createdAt)}
                       </TableCell>
-                      <TableCell className="pr-4 text-right" onClick={(e) => e.stopPropagation()}>
+                      <TableCell className="pr-5 text-right" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="size-8">
@@ -460,7 +459,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             </Table>
 
             {/* Card footer: total + pagination */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 px-5 py-3.5">
               <p className="text-sm text-muted-foreground">
                 {total} lead{total === 1 ? '' : 's'}
               </p>

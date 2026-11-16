@@ -88,15 +88,15 @@ async function main() {
   await db.lead.deleteMany();
   await db.user.deleteMany();
 
-  const passwordHash = await bcrypt.hash('Admin@123', 10);
-  const repHash = await bcrypt.hash('Sales@123', 10);
+  const passwordHash = await bcrypt.hash('Demo123!', 10);
+  const repHash = await bcrypt.hash('Demo123!', 10);
 
   const admin = await db.user.create({
     data: { name: 'Alex Carter', email: 'admin@young10marketing.com', passwordHash, role: 'ADMIN', active: true },
   });
   console.log('  admin created:', admin.email);
 
-  const reps = [];
+  const reps: Array<{ id: string }> = [];
   for (const rep of REPS) {
     reps.push(
       await db.user.create({
@@ -108,7 +108,7 @@ async function main() {
 
   // Assign leads round-robin: seeded pipeline work is distributed across reps
   const assignees = [reps[0], reps[1], reps[2], null];
-  const createdLeads = [];
+  const createdLeads: Array<{ id: string }> = [];
   for (let i = 0; i < LEAD_POOL.length; i++) {
     const pool = LEAD_POOL[i];
     const assignee = pool.stage === 'NEW' ? assignees[i % 4] : reps[i % 3];
@@ -193,8 +193,8 @@ async function main() {
   console.log('  activities created:', activities.length);
 
   console.log('Seed complete.');
-  console.log('  ADMIN  login: admin@young10marketing.com / Admin@123');
-  console.log('  REP    login: sarah@young10marketing.com / Sales@123');
+  console.log('  ADMIN  login: admin@young10marketing.com / Demo123!');
+  console.log('  REP    login: sarah@young10marketing.com / Demo123!');
 }
 
 main()

@@ -16,42 +16,35 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core';
 import type { SafeLead } from '@/types';
-import { BRAND, PIPELINE_STAGES, STAGE_META } from '@/lib/constants';
+import { PIPELINE_STAGES, STAGE_META } from '@/lib/constants';
 import type { PipelineStage } from '@/lib/constants';
 import { useLeads, useUpdateLead } from '@/hooks/use-crm';
 import { useCrmStore } from '@/store/crm-store';
-import { formatCurrency, SourceBadge, StageBadge, UserAvatar } from '@/components/shared/badges';
+import { formatCurrency, SourceBadge, UserAvatar } from '@/components/shared/badges';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 function KanbanCardContent({ lead }: { lead: SafeLead }) {
-  const stageMeta = STAGE_META[lead.stage];
+  const assigneeName = lead.assignedTo?.name ?? 'Unassigned';
   return (
-    <Card className="card-shadow relative gap-2 overflow-hidden p-3">
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[2px]"
-        style={{ backgroundColor: stageMeta.color }}
-      />
+    <Card className="card-shadow gap-2 rounded-xl border-border/70 bg-card p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#384BFE]/30">
       <div className="space-y-0.5">
-        <p className="text-sm font-bold leading-tight">
+        <p className="truncate text-[13.5px] font-semibold leading-tight text-foreground">
           {lead.firstName} {lead.lastName}
         </p>
         <p className="truncate text-xs text-muted-foreground">{lead.company ?? 'No company'}</p>
       </div>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-semibold">{formatCurrency(lead.value)}</span>
-        <SourceBadge source={lead.source} />
-      </div>
-      <div className="flex items-center justify-between gap-2 border-t pt-2">
-        <div className="flex min-w-0 items-center gap-1.5">
-          <UserAvatar name={lead.assignedTo?.name ?? 'Unassigned'} size="sm" />
-          <span className="truncate text-xs text-muted-foreground">
-            {lead.assignedTo?.name ?? 'Unassigned'}
+        <span className="text-[13px] font-semibold tabular-nums text-foreground">
+          {formatCurrency(lead.value)}
+        </span>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span title={assigneeName} aria-label={`Assigned to ${assigneeName}`}>
+            <UserAvatar name={assigneeName} size="sm" />
           </span>
+          <SourceBadge source={lead.source} />
         </div>
-        <StageBadge stage={lead.stage} />
       </div>
     </Card>
   );
@@ -80,7 +73,7 @@ function DraggableLeadCard({
           ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 }
           : undefined
       }
-      className={isDragging ? 'opacity-30' : undefined}
+      className={isDragging ? 'opacity-30' : 'cursor-grab'}
       onClick={() => {
         if (suppressClick()) return;
         onOpen(lead.id);
@@ -109,36 +102,39 @@ function PipelineColumn({
   const sum = useMemo(() => leads.reduce((acc, l) => acc + l.value, 0), [leads]);
 
   return (
-    <div className="flex min-w-[280px] flex-1 snap-start flex-col gap-2">
+    <div
+      className={`flex min-w-[280px] flex-1 snap-start flex-col gap-2.5 rounded-2xl border border-dashed border-transparent bg-[#F4F5FA] p-3 transition-colors duration-200 ${
+        draggingActive && isOver ? 'border-2 border-[#384BFE]/40 bg-[#EEF0FF]/40' : ''
+      }`}
+    >
       {/* Column header */}
-      <div className="flex items-center justify-between gap-2 px-1">
-        <div className="flex items-center gap-2">
-          <span
-            className="size-2.5 shrink-0 rounded-full"
-            style={{ backgroundColor: meta.color }}
-            aria-hidden
-          />
-          <span className="text-xs font-semibold uppercase tracking-wide">{meta.label}</span>
-          <span
-            className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-            style={{ backgroundColor: meta.soft, color: meta.color }}
-          >
-            {leads.length}
-          </span>
-        </div>
-        <span className="text-sm text-muted-foreground">{formatCurrency(sum, { compact: true })}</span>
+      <div className="flex items-center gap-2">
+        <span
+          className="h-2 w-2 shrink-0 rounded-full"
+          style={{ backgroundColor: meta.color }}
+          aria-hidden
+        />
+        <span className="truncate text-[13px] font-semibold text-foreground">{meta.label}</span>
+        <span className="ml-auto flex min-w-6 items-center justify-center rounded-full border border-border bg-white px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
+          {leads.length}
+        </span>
+        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+          {formatCurrency(sum, { compact: true })}
+        </span>
       </div>
 
-      {/* Droppable body */}
+      {/* Stage soft accent bar */}
       <div
-        ref={setNodeRef}
-        className={`min-h-[120px] flex-1 space-y-3 rounded-xl bg-muted/40 p-2 transition-shadow ${
-          draggingActive && isOver ? 'ring-2 ring-[#384BFE]/40' : ''
-        }`}
-      >
+        aria-hidden
+        className="h-[3px] w-full rounded-full opacity-30"
+        style={{ backgroundColor: meta.color }}
+      />
+
+      {/* Droppable body */}
+      <div ref={setNodeRef} className="min-h-[120px] flex-1 space-y-3">
         {leads.length === 0 ? (
-          <div className="flex h-full min-h-[120px] items-center justify-center rounded-xl border border-dashed p-4">
-            <p className="text-xs text-muted-foreground">Drop leads here</p>
+          <div className="flex h-full min-h-[120px] items-center justify-center rounded-xl border border-dashed border-border/70 py-6 text-center">
+            <p className="text-[12px] text-muted-foreground">No leads</p>
           </div>
         ) : (
           leads.map((lead) => (
@@ -157,15 +153,17 @@ function PipelineColumn({
 
 function ColumnSkeleton() {
   return (
-    <div className="flex min-w-[280px] flex-1 flex-col gap-2">
-      <div className="flex items-center gap-2 px-1">
-        <Skeleton className="size-2.5 rounded-full" />
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="ml-auto h-4 w-14" />
+    <div className="flex min-w-[280px] flex-1 flex-col gap-2.5 rounded-2xl border border-transparent bg-[#F4F5FA] p-3">
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-2 w-2 rounded-full" />
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="ml-auto h-5 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-10" />
       </div>
-      <div className="min-h-[120px] space-y-3 rounded-xl bg-muted/40 p-2">
-        <Skeleton className="h-[92px] rounded-xl" />
-        <Skeleton className="h-[92px] rounded-xl" />
+      <Skeleton className="h-[3px] w-full rounded-full" />
+      <div className="min-h-[120px] flex-1 space-y-3">
+        <Skeleton className="h-[96px] rounded-xl" />
+        <Skeleton className="h-[96px] rounded-xl" />
       </div>
     </div>
   );
@@ -250,20 +248,23 @@ export default function PipelineView() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#384BFE]">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
             Sales Pipeline
           </p>
-          <h1 className="text-2xl font-bold tracking-tight">Pipeline</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Pipeline</h1>
+          <p className="text-sm text-muted-foreground">
+            Drag leads across stages to keep every open deal moving.
+          </p>
         </div>
-        <div
-          className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
-          style={{ backgroundColor: STAGE_META.NEW.soft, color: BRAND.blue }}
-        >
-          <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <div className="card-shadow flex shrink-0 items-center gap-2.5 rounded-full border border-border bg-white px-3.5 py-2">
+          <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-[#384BFE]" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
             Open pipeline
           </span>
-          {formatCurrency(pipelineValue)}
+          <span className="text-xs font-semibold tabular-nums text-foreground">
+            {formatCurrency(pipelineValue)}
+          </span>
         </div>
       </div>
 
@@ -276,7 +277,7 @@ export default function PipelineView() {
         onDragCancel={handleDragCancel}
       >
         <div
-          className={`flex gap-4 overflow-x-auto pb-2 scrollbar-slim snap-x ${
+          className={`scrollbar-slim flex gap-4 overflow-x-auto pb-3 pt-1 snap-x ${
             activeId ? 'cursor-grabbing select-none' : ''
           }`}
         >
@@ -296,7 +297,7 @@ export default function PipelineView() {
 
         <DragOverlay>
           {activeLead ? (
-            <div className="w-[260px] rotate-1 cursor-grabbing">
+            <div className="w-[260px] rotate-none scale-[1.02] cursor-grabbing rounded-xl shadow-lg ring-2 ring-[#384BFE]/30">
               <KanbanCardContent lead={activeLead} />
             </div>
           ) : null}

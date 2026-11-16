@@ -1,18 +1,32 @@
-// Young10 Marketing CRM - authentication screen (sign in / sign up)
+// Young10 Marketing CRM - sign in / create account
+// Design mirrors young10marketing.com: ink top bar, lavender wash,
+// official wordmark, bold two-tone headline and a floating white card.
 
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { AnimatePresence, motion, type MotionProps, type Variants } from 'framer-motion';
-import { Eye, EyeOff, Loader2, Lock, Mail, User } from 'lucide-react';
+import { motion, type Variants } from 'framer-motion';
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Loader2,
+  Lock,
+  Mail,
+  Phone,
+  User,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Logo, LogoMark } from '@/components/brand/logo';
-import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/brand/logo';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLogin, useRegister } from '@/hooks/use-crm';
+import { cn } from '@/lib/utils';
 
 type AuthMode = 'login' | 'register';
 
@@ -31,22 +45,20 @@ const registerSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
-/** Subtle fade + rise entrance used across the screen (300-400ms, staggered by delay). */
-function rise(delay = 0): MotionProps {
-  return {
-    initial: { opacity: 0, y: 14 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.35, ease: 'easeOut', delay },
-  };
-}
+/** One-click demo credentials (kept in sync with the database seed). */
+const DEMO_ACCOUNTS = [
+  { title: 'Admin', sub: 'Alex Carter', email: 'admin@young10marketing.com', password: 'Demo123!' },
+  { title: 'Sarah', sub: 'Sales rep', email: 'sarah@young10marketing.com', password: 'Demo123!' },
+  { title: 'Mike', sub: 'Sales rep', email: 'mike@young10marketing.com', password: 'Demo123!' },
+];
 
 const formContainer: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.06 } },
+  show: { transition: { staggerChildren: 0.05 } },
 };
 
 const formItem: Variants = {
-  hidden: { opacity: 0, y: 12 },
+  hidden: { opacity: 0, y: 10 },
   show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
 };
 
@@ -84,6 +96,13 @@ export default function AuthScreen() {
       delete next[field];
       return next;
     });
+  }
+
+  function autofillDemo(account: (typeof DEMO_ACCOUNTS)[number]) {
+    setMode('login');
+    setEmail(account.email);
+    setPassword(account.password);
+    setErrors({});
   }
 
   function switchMode(next: AuthMode) {
@@ -135,71 +154,125 @@ export default function AuthScreen() {
   const passwordToggleLabel = showPassword ? 'Hide password' : 'Show password';
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Left brand panel - desktop only, decorative pinwheel composition */}
-      <aside className="ink-gradient relative hidden overflow-hidden lg:flex lg:w-[45%] lg:shrink-0">
-        <motion.div
-          aria-hidden="true"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
-          className="absolute inset-0"
-        >
-          <div className="pinwheel-field absolute inset-0" />
-          <div
-            className="absolute left-1/2 top-1/2 size-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
-            style={{ background: 'radial-gradient(circle, rgba(56,75,254,0.35) 0%, rgba(56,75,254,0) 70%)' }}
-          />
-          <LogoMark size={380} className="absolute -right-24 -top-24 animate-spin-slow opacity-10" />
-          <LogoMark size={230} className="absolute -left-14 bottom-[10%] animate-float-slow opacity-10 [animation-delay:-2.5s]" />
-          <LogoMark size={150} className="absolute bottom-[30%] right-[16%] animate-float-slow opacity-[0.07] [animation-delay:-4.5s]" />
-          <LogoMark size={110} className="absolute left-[16%] top-[24%] animate-spin-slow opacity-[0.06] [animation-delay:-8s]" />
-        </motion.div>
-        <motion.div {...rise(0.1)} className="relative z-10 p-8 xl:p-10">
-          <Logo variant="white" size={40} />
-        </motion.div>
-      </aside>
+    <div className="flex min-h-screen flex-col bg-[#FBFBFE]">
+      {/* Ink contact bar - identical to the site header chrome */}
+      <header className="ink-gradient flex h-11 shrink-0 items-center justify-between px-4 text-[12.5px] text-white/90 md:px-8">
+        <div className="flex items-center gap-6">
+          <a
+            href="mailto:alex@young10marketing.com"
+            className="flex items-center gap-2 transition-colors hover:text-white"
+          >
+            <Mail className="h-3.5 w-3.5 text-white/70" aria-hidden="true" />
+            <span className="hidden sm:inline">alex@young10marketing.com</span>
+            <span className="sm:hidden">Email</span>
+          </a>
+          <a href="tel:+12708444916" className="hidden items-center gap-2 transition-colors hover:text-white md:flex">
+            <Phone className="h-3.5 w-3.5 text-white/70" aria-hidden="true" />
+            +1 270-844-4916
+          </a>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-white/70 sm:inline">Follow Us</span>
+          <div className="flex items-center gap-1.5">
+            {[Facebook, Instagram, Linkedin].map((Icon, i) => (
+              <span
+                key={i}
+                className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-primary text-white"
+              >
+                <Icon className="h-3 w-3" aria-hidden="true" />
+              </span>
+            ))}
+          </div>
+        </div>
+      </header>
 
-      {/* Right panel - form column with sticky footer rule */}
-      <div className="flex min-h-screen flex-1 flex-col bg-white">
-        <motion.div {...rise(0)} className="ink-gradient flex items-center justify-center py-8 lg:hidden">
-          <Logo variant="white" size={34} />
-        </motion.div>
+      <main className="auth-wash relative flex-1 overflow-hidden">
+        {/* Quiet geometry - thin arcs and dots, echoing the site hero */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-36 -top-44 h-[480px] w-[480px] rounded-full border border-[#384BFE]/12" />
+          <div className="absolute -left-24 -top-32 h-[360px] w-[360px] rounded-full border border-[#384BFE]/10" />
+          <div className="absolute -bottom-52 -right-40 h-[520px] w-[520px] rounded-full border border-[#384BFE]/10" />
+          <div className="absolute left-[46%] top-16 h-3 w-3 rounded-full border-2 border-red-500/60" />
+          <div className="absolute right-[38%] top-[46%] h-2 w-2 rounded-full bg-[#384BFE]/50" />
+          <div className="absolute left-[42%] bottom-14 h-1.5 w-1.5 rounded-full bg-[#384BFE]/40" />
+        </div>
 
-        <main className="flex flex-1 items-center justify-center px-6 py-12">
-          <motion.div {...rise(0.05)} className="mx-auto w-full max-w-sm">
-            <AnimatePresence initial={false} mode="wait">
+        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 px-6 py-12 md:px-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:py-20">
+          {/* Brand column */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: 'easeOut' }}
+          >
+            <Logo height={46} className="hidden lg:inline-flex" />
+            <div className="mt-12 flex items-center gap-3 lg:mt-14">
+              <span className="h-[3px] w-9 rounded-full bg-primary" aria-hidden="true" />
+              <p className="text-[13px] font-bold uppercase tracking-[0.18em] text-primary">
+                Your growth, in focus
+              </p>
+            </div>
+            <h1 className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight text-foreground sm:text-5xl xl:text-[56px]">
+              Professional
+              <br />
+              marketing.
+              <br />
+              <span className="text-primary">Personal</span> connections.
+            </h1>
+            <p className="mt-6 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+              Keep every opportunity moving. Sign in to manage your leads, relationships, and next
+              steps&mdash;all in one place.
+            </p>
+          </motion.div>
+
+          {/* Card column */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.08, ease: 'easeOut' }}
+            className="w-full max-w-[460px] justify-self-center"
+          >
+            <div className="card-float rounded-2xl border border-white/70 bg-white px-7 py-8 sm:px-9 sm:py-9">
+              <Logo height={38} className="lg:hidden" />
+
               <motion.div
                 key={mode}
                 variants={formContainer}
                 initial="hidden"
                 animate="show"
-                exit={{ opacity: 0, y: -8, transition: { duration: 0.16, ease: 'easeIn' } }}
+                className="mt-6 lg:mt-0"
               >
-                <motion.div variants={formItem}>
-                  <LogoMark size={28} />
-                  <h1 className="mt-5 text-2xl font-semibold tracking-tight text-foreground">
-                    {mode === 'login' ? 'Welcome back' : 'Create your account'}
-                  </h1>
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    {mode === 'login' ? 'Sign in to your CRM workspace' : 'Join your CRM workspace'}
-                  </p>
-                </motion.div>
+                <motion.p
+                  variants={formItem}
+                  className="text-[12px] font-bold uppercase tracking-[0.18em] text-primary"
+                >
+                  {mode === 'login' ? 'Welcome back' : 'Join the team'}
+                </motion.p>
+                <motion.h2 variants={formItem} className="mt-2 text-[27px] font-bold tracking-tight text-foreground">
+                  {mode === 'login' ? 'Sign in to your CRM' : 'Create your account'}
+                </motion.h2>
+                <motion.p variants={formItem} className="mt-1.5 text-sm text-muted-foreground">
+                  {mode === 'login'
+                    ? 'Enter your details to access your workspace.'
+                    : 'Set up your rep account in seconds.'}
+                </motion.p>
 
-                <form noValidate onSubmit={handleSubmit} className="mt-8 space-y-5">
+                <form noValidate onSubmit={handleSubmit} className="mt-7 space-y-4">
                   {mode === 'register' ? (
                     <motion.div variants={formItem} className="space-y-1.5">
-                      <Label htmlFor="name">Full name</Label>
+                      <Label htmlFor="name" className="text-[13px] font-semibold text-foreground">
+                        Full name
+                      </Label>
                       <div className="relative">
-                        <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
                         <Input
                           id="name"
                           type="text"
                           autoComplete="name"
+                          placeholder="Jordan Blake"
                           value={name}
                           onChange={(e) => handleFieldChange('name', e.target.value)}
                           aria-invalid={Boolean(errors.name)}
-                          className="pl-10"
+                          className="h-12 rounded-[10px] border-transparent bg-[#F1F3FA] pl-10 text-[15px] transition-colors focus-visible:bg-white focus-visible:border-[#384BFE]/50 focus-visible:ring-4 focus-visible:ring-[#384BFE]/10"
                         />
                       </div>
                       {errors.name ? <p className="text-xs text-red-500">{errors.name}</p> : null}
@@ -207,74 +280,128 @@ export default function AuthScreen() {
                   ) : null}
 
                   <motion.div variants={formItem} className="space-y-1.5">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="text-[13px] font-semibold text-foreground">
+                      Email address
+                    </Label>
                     <div className="relative">
-                      <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
                       <Input
                         id="email"
                         type="email"
                         autoComplete="email"
+                        placeholder="you@young10marketing.com"
                         value={email}
                         onChange={(e) => handleFieldChange('email', e.target.value)}
                         aria-invalid={Boolean(errors.email)}
-                        className="pl-10"
+                        className="h-12 rounded-[10px] border-transparent bg-[#F1F3FA] pl-10 text-[15px] transition-colors focus-visible:bg-white focus-visible:border-[#384BFE]/50 focus-visible:ring-4 focus-visible:ring-[#384BFE]/10"
                       />
                     </div>
                     {errors.email ? <p className="text-xs text-red-500">{errors.email}</p> : null}
                   </motion.div>
 
                   <motion.div variants={formItem} className="space-y-1.5">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-[13px] font-semibold text-foreground">
+                      Password
+                    </Label>
                     <div className="relative">
-                      <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
                       <Input
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                        placeholder="Enter your password"
                         value={password}
                         onChange={(e) => handleFieldChange('password', e.target.value)}
                         aria-invalid={Boolean(errors.password)}
-                        className="pl-10 pr-10"
+                        className="h-12 rounded-[10px] border-transparent bg-[#F1F3FA] pl-10 pr-10 text-[15px] transition-colors focus-visible:bg-white focus-visible:border-[#384BFE]/50 focus-visible:ring-4 focus-visible:ring-[#384BFE]/10"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
                         aria-label={passwordToggleLabel}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                       >
-                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                     {errors.password ? <p className="text-xs text-red-500">{errors.password}</p> : null}
                   </motion.div>
 
-                  <motion.div variants={formItem}>
-                    <Button type="submit" className="w-full" disabled={pending}>
-                      {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
+                  <motion.div variants={formItem} className="pt-1.5">
+                    <button
+                      type="submit"
+                      disabled={pending}
+                      className={cn(
+                        'brand-shadow flex h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-primary text-[15px] font-semibold text-white',
+                        'transition-all hover:bg-[#2B3AD1] active:scale-[0.99]',
+                        'disabled:cursor-not-allowed disabled:opacity-70',
+                      )}
+                    >
+                      {pending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      ) : null}
                       {mode === 'login' ? 'Sign In' : 'Create Account'}
-                    </Button>
+                      {pending ? null : <ArrowRight className="h-4 w-4" aria-hidden="true" />}
+                    </button>
                   </motion.div>
                 </form>
 
+                {mode === 'login' ? (
+                  <motion.div variants={formItem}>
+                    <div className="mt-7 flex items-center gap-4" aria-hidden="true">
+                      <span className="h-px flex-1 bg-border" />
+                      <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                        Demo access
+                      </span>
+                      <span className="h-px flex-1 bg-border" />
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-3 gap-2.5" role="group" aria-label="Demo accounts - click to autofill">
+                      {DEMO_ACCOUNTS.map((account) => (
+                        <button
+                          key={account.email}
+                          type="button"
+                          onClick={() => autofillDemo(account)}
+                          title={`Autofill ${account.email}`}
+                          className="group rounded-xl border border-border bg-white px-2 py-3 text-center transition-all hover:-translate-y-0.5 hover:border-[#384BFE]/50 hover:bg-[#F7F8FF] hover:shadow-[0_10px_20px_-10px_rgba(56,75,254,0.35)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#384BFE]"
+                        >
+                          <span className="block text-[13px] font-bold text-foreground transition-colors group-hover:text-primary">
+                            {account.title}
+                          </span>
+                          <span className="mt-0.5 block text-[11px] text-muted-foreground">{account.sub}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-3.5 text-center text-xs text-muted-foreground">
+                      Demo password: <span className="font-semibold text-foreground">Demo123!</span>
+                    </p>
+                  </motion.div>
+                ) : null}
+
                 <motion.p variants={formItem} className="mt-6 text-center text-sm text-muted-foreground">
-                  {mode === 'login' ? 'New here? ' : 'Have an account? '}
+                  {mode === 'login' ? 'New to the team? ' : 'Already have an account? '}
                   <button
                     type="button"
                     onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
-                    className="font-medium text-primary transition-colors hover:text-primary/80"
+                    className="font-semibold text-primary transition-colors hover:text-[#2B3AD1]"
                   >
-                    {mode === 'login' ? 'Create Account' : 'Sign In'}
+                    {mode === 'login' ? 'Create an account' : 'Sign in'}
                   </button>
                 </motion.p>
               </motion.div>
-            </AnimatePresence>
+            </div>
           </motion.div>
-        </main>
+        </div>
+      </main>
 
-        <footer className="mt-auto border-t border-border/70 px-6 py-5">
-          <p className="text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Young10 Marketing</p>
-        </footer>
-      </div>
+      <footer className="shrink-0 border-t border-border/70 bg-white/60 px-6 py-4 md:px-10">
+        <div className="mx-auto flex max-w-6xl items-center justify-between text-xs text-muted-foreground">
+          <p>
+            &copy; {new Date().getFullYear()} <span className="font-semibold text-foreground">Young10 Marketing</span>
+          </p>
+          <p className="hidden sm:block">Professional Digital Marketing Agency &middot; Sheridan, WY</p>
+        </div>
+      </footer>
     </div>
   );
 }
