@@ -482,86 +482,40 @@ export default function AdminView({ user }: { user: SafeUser }) {
                 ))}
               </div>
             ) : (
-              <Table>
-                <TableHeader className="bg-[#F8F9FC]">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="px-6 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      Member
-                    </TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      Role
-                    </TableHead>
-                    <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      Status
-                    </TableHead>
-                    <TableHead className="px-6 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      Joined
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <>
+                {/* Mobile member cards (hidden on sm+) */}
+                <div className="divide-y divide-border/60 sm:hidden">
                   {(members ?? []).map((member) => {
                     const isSelf = member.id === user.id;
                     return (
-                      <TableRow key={member.id} className="hover:bg-[#F7F8FC]">
-                        <TableCell className="px-6">
-                          <div className="flex items-center gap-3">
-                            <UserAvatar name={member.name} />
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="truncate text-sm font-semibold">{member.name}</span>
-                                {isSelf && (
-                                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                                    You
-                                  </span>
-                                )}
-                              </div>
-                              <div className="truncate text-xs text-muted-foreground">{member.email}</div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                'border-transparent font-semibold',
-                                member.role === 'ADMIN'
-                                  ? 'bg-[#EEF0FF] text-primary'
-                                  : 'bg-muted text-muted-foreground',
+                      <div key={member.id} className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <UserAvatar name={member.name} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="truncate text-sm font-semibold">{member.name}</span>
+                              {isSelf && (
+                                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                                  You
+                                </span>
                               )}
-                            >
-                              {ROLE_META[member.role].label}
-                            </Badge>
-                            {!isSelf && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    aria-label={`Change role for ${member.name}`}
-                                  >
-                                    <ChevronDown className="h-3.5 w-3.5" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start">
-                                  {(['ADMIN', 'SALES_REP'] as const).map((role) => (
-                                    <DropdownMenuItem
-                                      key={role}
-                                      onSelect={() => void handleRoleChange(member, role)}
-                                    >
-                                      {ROLE_META[role].label}
-                                      {member.role === role && <Check className="ml-auto h-3.5 w-3.5" />}
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
+                            </div>
+                            <div className="truncate text-xs text-muted-foreground">{member.email}</div>
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2.5">
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              'shrink-0 border-transparent font-semibold',
+                              member.role === 'ADMIN'
+                                ? 'bg-[#EEF0FF] text-primary'
+                                : 'bg-muted text-muted-foreground',
+                            )}
+                          >
+                            {ROLE_META[member.role].label}
+                          </Badge>
+                        </div>
+                        <div className="mt-2.5 flex items-center justify-between pl-1">
+                          <div className="flex items-center gap-2">
                             <span
                               className={cn(
                                 'h-2 w-2 shrink-0 rounded-full',
@@ -574,14 +528,149 @@ export default function AdminView({ user }: { user: SafeUser }) {
                               onCheckedChange={(checked) => void handleToggleActive(member, checked)}
                               aria-label={`Toggle active for ${member.name}`}
                             />
+                            <span className="text-xs text-muted-foreground">
+                              {member.active ? 'Active' : 'Inactive'}
+                            </span>
                           </div>
-                        </TableCell>
-                        <TableCell className="px-6 text-[13px] text-muted-foreground">{formatDate(member.createdAt)}</TableCell>
-                      </TableRow>
+                          {!isSelf && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 gap-1.5 rounded-[10px] text-xs font-semibold text-muted-foreground"
+                                  aria-label={`Change role for ${member.name}`}
+                                >
+                                  Change role
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {(['ADMIN', 'SALES_REP'] as const).map((role) => (
+                                  <DropdownMenuItem
+                                    key={role}
+                                    onSelect={() => void handleRoleChange(member, role)}
+                                  >
+                                    {ROLE_META[role].label}
+                                    {member.role === role && <Check className="ml-auto h-3.5 w-3.5" />}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          )}
+                        </div>
+                        <p className="mt-1.5 pl-1 text-[11px] text-muted-foreground">
+                          Joined {formatDate(member.createdAt)}
+                        </p>
+                      </div>
                     );
                   })}
-                </TableBody>
-              </Table>
+                </div>
+
+                {/* Desktop table (hidden on mobile) */}
+                <div className="hidden sm:block">
+                  <Table>
+                    <TableHeader className="bg-[#F8F9FC]">
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="px-6 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          Member
+                        </TableHead>
+                        <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          Role
+                        </TableHead>
+                        <TableHead className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          Status
+                        </TableHead>
+                        <TableHead className="px-6 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          Joined
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(members ?? []).map((member) => {
+                        const isSelf = member.id === user.id;
+                        return (
+                          <TableRow key={member.id} className="hover:bg-[#F7F8FC]">
+                            <TableCell className="px-6">
+                              <div className="flex items-center gap-3">
+                                <UserAvatar name={member.name} />
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="truncate text-sm font-semibold">{member.name}</span>
+                                    {isSelf && (
+                                      <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                                        You
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="truncate text-xs text-muted-foreground">{member.email}</div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    'border-transparent font-semibold',
+                                    member.role === 'ADMIN'
+                                      ? 'bg-[#EEF0FF] text-primary'
+                                      : 'bg-muted text-muted-foreground',
+                                  )}
+                                >
+                                  {ROLE_META[member.role].label}
+                                </Badge>
+                                {!isSelf && (
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6"
+                                        aria-label={`Change role for ${member.name}`}
+                                      >
+                                        <ChevronDown className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start">
+                                      {(['ADMIN', 'SALES_REP'] as const).map((role) => (
+                                        <DropdownMenuItem
+                                          key={role}
+                                          onSelect={() => void handleRoleChange(member, role)}
+                                        >
+                                          {ROLE_META[role].label}
+                                          {member.role === role && <Check className="ml-auto h-3.5 w-3.5" />}
+                                        </DropdownMenuItem>
+                                      ))}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2.5">
+                                <span
+                                  className={cn(
+                                    'h-2 w-2 shrink-0 rounded-full',
+                                    member.active ? 'bg-[#16A34A]' : 'bg-[#C6C9D4]',
+                                  )}
+                                />
+                                <Switch
+                                  checked={member.active}
+                                  disabled={isSelf || updateUser.isPending}
+                                  onCheckedChange={(checked) => void handleToggleActive(member, checked)}
+                                  aria-label={`Toggle active for ${member.name}`}
+                                />
+                              </div>
+                            </TableCell>
+                            <TableCell className="px-6 text-[13px] text-muted-foreground">{formatDate(member.createdAt)}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
 
             <div className="border-t bg-[#FAFAFD] px-6 py-3 text-[13px] text-muted-foreground">
@@ -656,7 +745,8 @@ export default function AdminView({ user }: { user: SafeUser }) {
                 </p>
               </div>
             ) : (
-              <Table>
+              <div className="scrollbar-slim overflow-x-auto">
+                <Table className="min-w-[680px]">
                 <TableHeader className="bg-[#F8F9FC]">
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="px-6 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -761,7 +851,8 @@ export default function AdminView({ user }: { user: SafeUser }) {
                     );
                   })}
                 </TableBody>
-              </Table>
+                </Table>
+              </div>
             )}
           </Card>
         </TabsContent>

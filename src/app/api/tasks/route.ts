@@ -1,31 +1,29 @@
 // GET /api/tasks - list (RBAC scoped) with counts
 // POST /api/tasks - create task
+//
+// Performance: flat queries + in-memory relation hydration (see lead-hydrate)
+// so the list costs one round trip instead of three sequential include queries.
 
 import { NextRequest } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { handleApiError, ok, requireUser, ApiError } from '@/lib/api-helpers';
+import { cached, bustCache } from '@/lib/cache';
+import { loadUsersBundle, loadLeadsBundle, serializeTaskWith } from '@/lib/lead-hydrate';
 import { taskCreateSchema } from '@/lib/validation';
 import { TASK_STATUSES, TASK_PRIORITIES } from '@/lib/constants';
 import type { SafeTask, TaskListResult, TaskStatusValue, TaskPriorityValue } from '@/types';
 
-const TASK_INCLUDE = {
-  assignedTo: { select: { id: true, name: true, email: true, role: true } },
-  lead: { select: { id: true, firstName: true, lastName: true, company: true, stage: true } },
-} satisfies Prisma.TaskInclude;
+type TaskRow = Prisma.TaskGetPayload<Record<never, never>>;
 
-type TaskWithRelations = Prisma.TaskGetPayload<{ include: typeof TASK_INCLUDE }>;
-
-function serializeTask(task: TaskWithRelations): SafeTask {
+function serializeTaskFlat(task: TaskRow): SafeTask {
   return {
     ...task,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
     dueDate: task.dueDate ? task.dueDate.toISOString() : null,
     completedAt: task.completedAt ? task.completedAt.toISOString() : null,
-    assignedTo: task.assignedTo,
-    lead: task.lead,
-  };
+  } as unknown as SafeTask;
 }
 
 function nullOrValue(value: string | undefined | null): string | null | undefined {
@@ -58,29 +56,36 @@ export async function GET(req: NextRequest) {
       scope.priority = priority as TaskPriorityValue;
     }
 
-    const [tasks, pending, inProgress, completed, overdue] = await Promise.all([
-      db.task.findMany({
-        where: scope,
-        include: TASK_INCLUDE,
-        orderBy: [{ status: 'asc' }, { dueDate: 'asc' }, { createdAt: 'desc' }],
-        take: 200,
-      }),
-      db.task.count({ where: { ...scope, status: 'PENDING' } }),
-      db.task.count({ where: { ...scope, status: 'IN_PROGRESS' } }),
-      db.task.count({ where: { ...scope, status: 'COMPLETED' } }),
-      db.task.count({
-        where: {
-          ...scope,
-          status: { not: 'COMPLETED' },
-          dueDate: { lt: new Date() },
-        },
-      }),
-    ]);
-
-    const result: TaskListResult = {
-      tasks: tasks.map(serializeTask),
-      counts: { pending, inProgress, completed, overdue },
-    };
+    // Short TTL cache smooths polling / repeated switches between filters
+    const cacheKey = `tasks:list:${auth.id}:${auth.role}:${JSON.stringify({ scope })}`;
+    const result: TaskListResult = await cached(cacheKey, 3_000, async () => {
+      const [tasks, pending, inProgress, completed, overdue, usersBundle, leadsBundle] =
+        await Promise.all([
+          db.task.findMany({
+            where: scope,
+            orderBy: [{ status: 'asc' }, { dueDate: 'asc' }, { createdAt: 'desc' }],
+            take: 200,
+          }),
+          db.task.count({ where: { ...scope, status: 'PENDING' } }),
+          db.task.count({ where: { ...scope, status: 'IN_PROGRESS' } }),
+          db.task.count({ where: { ...scope, status: 'COMPLETED' } }),
+          db.task.count({
+            where: {
+              ...scope,
+              status: { not: 'COMPLETED' },
+              dueDate: { lt: new Date() },
+            },
+          }),
+          loadUsersBundle(),
+          loadLeadsBundle(),
+        ]);
+      return {
+        tasks: tasks.map((task) =>
+          serializeTaskWith(serializeTaskFlat(task), usersBundle.map, leadsBundle.map),
+        ),
+        counts: { pending, inProgress, completed, overdue },
+      };
+    });
     return ok<TaskListResult>(result);
   } catch (err) {
     return handleApiError(err);
@@ -96,7 +101,7 @@ export async function POST(req: NextRequest) {
     let leadId: string | null = null;
     const rawLeadId = nullOrValue(input.leadId);
     if (rawLeadId) {
-      const lead = await db.lead.findUnique({ where: { id: rawLeadId } });
+      const lead = await db.lead.findUnique({ where: { id: rawLeadId }, select: { id: true, assignedToId: true, createdById: true } });
       if (!lead) throw new ApiError(400, 'Linked lead does not exist');
       if (auth.role !== 'ADMIN' && lead.assignedToId !== auth.id && lead.createdById !== auth.id) {
         throw new ApiError(403, 'You do not have access to this lead');
@@ -108,14 +113,15 @@ export async function POST(req: NextRequest) {
     let assignedToId: string | null = null;
     const rawAssignee = nullOrValue(input.assignedToId);
     if (auth.role === 'ADMIN' && rawAssignee) {
-      const target = await db.user.findUnique({ where: { id: rawAssignee } });
+      const target = await db.user.findUnique({ where: { id: rawAssignee }, select: { id: true } });
       if (!target) throw new ApiError(400, 'Assigned user does not exist');
       assignedToId = target.id;
     } else if (auth.role !== 'ADMIN' || !rawAssignee) {
       assignedToId = auth.id;
     }
 
-    const task = await db.task.create({
+    // Create is ONE round trip; the activity log is fire-and-forget
+    const created = await db.task.create({
       data: {
         title: input.title,
         description: nullOrValue(input.description),
@@ -126,19 +132,27 @@ export async function POST(req: NextRequest) {
         assignedToId,
         createdById: auth.id,
       },
-      include: TASK_INCLUDE,
     });
 
-    await db.activity.create({
-      data: {
-        type: 'TASK_CREATED',
-        message: `Created task "${task.title}"`,
-        userId: auth.id,
-        leadId: task.leadId,
-      },
-    });
+    void db.activity
+      .create({
+        data: {
+          type: 'TASK_CREATED',
+          message: `Created task "${created.title}"`,
+          userId: auth.id,
+          leadId: created.leadId,
+        },
+      })
+      .catch(() => null);
 
-    return ok<SafeTask>(serializeTask(task), 201);
+    bustCache('tasks:list');
+    bustCache('analytics');
+    bustCache('activities');
+
+    // Hydrate relations from cached maps (no extra DB round trips)
+    const [usersBundle, leadsBundle] = await Promise.all([loadUsersBundle(), loadLeadsBundle()]);
+    const task = serializeTaskWith(serializeTaskFlat(created), usersBundle.map, leadsBundle.map);
+    return ok<SafeTask>(task, 201);
   } catch (err) {
     return handleApiError(err);
   }

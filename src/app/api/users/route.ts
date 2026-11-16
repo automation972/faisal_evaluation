@@ -5,6 +5,7 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword } from '@/lib/auth';
 import { handleApiError, ok, requireUser, requireRole, ApiError } from '@/lib/api-helpers';
+import { cached, bustCache } from '@/lib/cache';
 import { registerSchema } from '@/lib/validation';
 import type { SafeUser } from '@/types';
 
@@ -15,13 +16,17 @@ export async function GET(req: NextRequest) {
     const auth = await requireUser();
     const includeInactive = req.nextUrl.searchParams.get('includeInactive') === 'true';
 
-    const users = await db.user.findMany({
-      where: includeInactive && auth.role === 'ADMIN' ? {} : { active: true },
-      select: SELECT,
-      orderBy: [{ role: 'asc' }, { name: 'asc' }],
+    // The users list is tiny and read constantly (assign dropdowns, filters)
+    const users = await cached(`users:${includeInactive}:${auth.role}`, 15_000, async () => {
+      const rows = await db.user.findMany({
+        where: includeInactive && auth.role === 'ADMIN' ? {} : { active: true },
+        select: SELECT,
+        orderBy: [{ role: 'asc' }, { name: 'asc' }],
+      });
+      return rows.map((u) => ({ ...u, createdAt: u.createdAt.toISOString() }));
     });
 
-    return ok<SafeUser[]>(users.map((u) => ({ ...u, createdAt: u.createdAt.toISOString() })));
+    return ok<SafeUser[]>(users);
   } catch (err) {
     return handleApiError(err);
   }
@@ -56,6 +61,9 @@ export async function POST(req: NextRequest) {
         userId: user.id,
       },
     });
+
+    bustCache('users:');
+    bustCache('hydrate:users');
 
     return ok<SafeUser>({ ...user, createdAt: user.createdAt.toISOString() }, 201);
   } catch (err) {

@@ -124,6 +124,10 @@ model Lead {
   @@index([assignedToId])
   @@index([source])
   @@index([createdAt])
+  // Composite indexes for hot dashboard / list queries
+  @@index([assignedToId, stage])
+  @@index([stage, status])
+  @@index([status, createdAt])
 }
 
 model Task {
@@ -147,6 +151,9 @@ model Task {
   @@index([status])
   @@index([assignedToId])
   @@index([dueDate])
+  @@index([leadId])
+  @@index([status, dueDate])
+  @@index([createdById])
 }
 
 model Activity {
@@ -161,6 +168,8 @@ model Activity {
   lead Lead?  @relation(fields: [leadId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
+  @@index([leadId])
+  @@index([userId, createdAt])
 }
 
 model ApiKey {

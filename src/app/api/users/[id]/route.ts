@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { invalidateSessionUser } from '@/lib/auth';
 import { handleApiError, ok, requireUser, requireRole, ApiError } from '@/lib/api-helpers';
+import { bustCache } from '@/lib/cache';
 import { userUpdateSchema } from '@/lib/validation';
 import type { SafeUser } from '@/types';
 
@@ -36,6 +37,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     // Role / activation changes must be visible immediately — drop the session cache
     invalidateSessionUser(id);
+    bustCache('users:');
+    bustCache('hydrate:users');
+    bustCache('analytics');
+    bustCache('leads:list');
 
     return ok<SafeUser>({ ...user, createdAt: user.createdAt.toISOString() });
   } catch (err) {

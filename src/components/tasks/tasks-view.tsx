@@ -293,12 +293,12 @@ export default function TasksView({ user }: { user: SafeUser }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs value={statusTab} onValueChange={(value) => setStatusTab(value as StatusTab)}>
-          <TabsList className="h-9 rounded-[10px] border border-border bg-white p-1 shadow-none">
-            <TabsTrigger value="ALL" className={SEGMENT_TRIGGER}>
+          <TabsList className="h-9 max-w-full overflow-x-auto rounded-[10px] border border-border bg-white p-1 shadow-none">
+            <TabsTrigger value="ALL" className={cn(SEGMENT_TRIGGER, 'shrink-0')}>
               All
             </TabsTrigger>
             {TASK_STATUSES.map((status) => (
-              <TabsTrigger key={status} value={status} className={SEGMENT_TRIGGER}>
+              <TabsTrigger key={status} value={status} className={cn(SEGMENT_TRIGGER, 'shrink-0')}>
                 {TASK_STATUS_META[status].label}
               </TabsTrigger>
             ))}

@@ -9,6 +9,17 @@ import type {
   UserRoleValue,
 } from '@/lib/constants';
 
+// Re-export the constant-derived union types so server routes can import
+// them from '@/types' alongside the entity interfaces.
+export type {
+  PipelineStage,
+  LeadSourceValue,
+  LeadStatusValue,
+  TaskPriorityValue,
+  TaskStatusValue,
+  UserRoleValue,
+} from '@/lib/constants';
+
 // ---------------------------------------------------------------------------
 // Entities
 // ---------------------------------------------------------------------------

@@ -1,31 +1,21 @@
 // GET /api/leads - searchable, filterable list (RBAC scoped)
 // POST /api/leads - create lead
+//
+// Performance notes: the remote PostgreSQL adds ~200ms per query round trip,
+// so this route uses ONE flat findMany (no Prisma `include`, which would add
+// two more sequential queries) and stitches user relations in memory from a
+// cached users map. Mutations bust both caches, so writes are always
+// reflected immediately.
 
 import { NextRequest } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { handleApiError, ok, requireUser, parseIntParam, ApiError } from '@/lib/api-helpers';
+import { cached, bustCache } from '@/lib/cache';
+import { loadUsersBundle, serializeLeadWith } from '@/lib/lead-hydrate';
 import { leadCreateSchema } from '@/lib/validation';
 import { DEFAULT_PAGE_SIZE, PIPELINE_STAGES, LEAD_SOURCES, LEAD_STATUSES } from '@/lib/constants';
 import type { SafeLead, LeadListResult, PipelineStage } from '@/types';
-
-const LEAD_INCLUDE = {
-  assignedTo: { select: { id: true, name: true, email: true, role: true } },
-  createdBy: { select: { id: true, name: true, email: true, role: true } },
-} satisfies Prisma.LeadInclude;
-
-type LeadWithRelations = Prisma.LeadGetPayload<{ include: typeof LEAD_INCLUDE }>;
-
-function serializeLead(lead: LeadWithRelations): SafeLead {
-  return {
-    ...lead,
-    createdAt: lead.createdAt.toISOString(),
-    updatedAt: lead.updatedAt.toISOString(),
-    lastContactedAt: lead.lastContactedAt ? lead.lastContactedAt.toISOString() : null,
-    assignedTo: lead.assignedTo,
-    createdBy: lead.createdBy,
-  };
-}
 
 function orUndefined(value: string | undefined | null | ''): string | undefined {
   if (value === undefined || value === null || value === '') return undefined;
@@ -36,6 +26,18 @@ function nullOrValue(value: string | undefined | null | ''): string | null | und
   if (value === undefined) return undefined;
   if (value === null || value === '') return null;
   return value;
+}
+
+type LeadRow = Prisma.LeadGetPayload<Record<never, never>>;
+
+function serializeLeadFlat(lead: LeadRow): SafeLead {
+  // Dates are serialized to ISO strings; relations are attached by hydrate
+  return {
+    ...lead,
+    createdAt: lead.createdAt.toISOString(),
+    updatedAt: lead.updatedAt.toISOString(),
+    lastContactedAt: lead.lastContactedAt ? lead.lastContactedAt.toISOString() : null,
+  } as SafeLead;
 }
 
 export async function GET(req: NextRequest) {
@@ -98,24 +100,28 @@ export async function GET(req: NextRequest) {
             ? { value: 'asc' }
             : { createdAt: 'desc' };
 
-    const [total, leads] = await Promise.all([
-      db.lead.count({ where: scope }),
-      db.lead.findMany({
-        where: scope,
-        include: LEAD_INCLUDE,
-        orderBy,
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-      }),
-    ]);
-
-    const result: LeadListResult = {
-      leads: leads.map(serializeLead),
-      total,
-      page,
-      pageSize,
-      pageCount: Math.max(1, Math.ceil(total / pageSize)),
-    };
+    // Short TTL cache: the same filters are re-fetched constantly (pagination,
+    // polling, multiple tabs). Mutations bust this cache.
+    const cacheKey = `leads:list:${auth.id}:${auth.role}:${JSON.stringify({ scope, orderBy, page, pageSize })}`;
+    const result: LeadListResult = await cached(cacheKey, 3_000, async () => {
+      const [total, leads, usersBundle] = await Promise.all([
+        db.lead.count({ where: scope }),
+        db.lead.findMany({
+          where: scope,
+          orderBy,
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        loadUsersBundle(),
+      ]);
+      return {
+        leads: leads.map((lead) => serializeLeadWith(serializeLeadFlat(lead), usersBundle.map)),
+        total,
+        page,
+        pageSize,
+        pageCount: Math.max(1, Math.ceil(total / pageSize)),
+      };
+    });
     return ok<LeadListResult>(result);
   } catch (err) {
     return handleApiError(err);
@@ -133,7 +139,7 @@ export async function POST(req: NextRequest) {
     if (auth.role === 'ADMIN') {
       const raw = orUndefined(input.assignedToId);
       if (raw) {
-        const target = await db.user.findUnique({ where: { id: raw } });
+        const target = await db.user.findUnique({ where: { id: raw }, select: { id: true } });
         if (!target) throw new ApiError(400, 'Assigned user does not exist');
         assignedToId = target.id;
       }
@@ -141,7 +147,10 @@ export async function POST(req: NextRequest) {
       assignedToId = auth.id;
     }
 
-    const lead = await db.lead.create({
+    // Create is ONE round trip; the activity log is written fire-and-forget
+    // (it never blocks the response).
+    const displayName = `${input.firstName} ${input.lastName}`;
+    const created = await db.lead.create({
       data: {
         firstName: input.firstName,
         lastName: input.lastName,
@@ -157,19 +166,28 @@ export async function POST(req: NextRequest) {
         assignedToId,
         createdById: auth.id,
       },
-      include: LEAD_INCLUDE,
     });
 
-    await db.activity.create({
-      data: {
-        type: 'LEAD_CREATED',
-        message: `Created lead ${lead.firstName} ${lead.lastName}${lead.company ? ` at ${lead.company}` : ''}`,
-        userId: auth.id,
-        leadId: lead.id,
-      },
-    });
+    void db.activity
+      .create({
+        data: {
+          type: 'LEAD_CREATED',
+          message: `Created lead ${displayName}${input.company ? ` at ${input.company}` : ''}`,
+          userId: auth.id,
+          leadId: created.id,
+        },
+      })
+      .catch(() => null);
 
-    return ok<SafeLead>(serializeLead(lead), 201);
+    bustCache('leads:list');
+    bustCache('hydrate:leads');
+    bustCache('analytics');
+    bustCache('activities');
+
+    // Hydrate relations from the cached users map (no extra DB round trip)
+    const usersBundle = await loadUsersBundle();
+    const lead = serializeLeadWith(serializeLeadFlat(created), usersBundle.map);
+    return ok<SafeLead>(lead, 201);
   } catch (err) {
     return handleApiError(err);
   }

@@ -78,6 +78,61 @@ type StatusFilter = LeadStatusValue | 'ALL';
 type SourceFilter = LeadSourceValue | 'ALL';
 type SortValue = NonNullable<LeadListParams['sort']>;
 
+/** Shared row/card actions menu (edit, mark lost, delete). */
+function LeadActionsMenu({
+  lead,
+  isAdmin,
+  onEdit,
+  onLost,
+  onDelete,
+}: {
+  lead: SafeLead;
+  isAdmin: boolean;
+  onEdit: (lead: SafeLead) => void;
+  onLost: (lead: SafeLead) => void;
+  onDelete: (lead: SafeLead) => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="size-8">
+          <MoreHorizontal className="size-4" />
+          <span className="sr-only">Lead actions</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem onClick={() => onEdit(lead)} className="cursor-pointer">
+          <Pencil className="size-4" />
+          Edit
+        </DropdownMenuItem>
+        {lead.status === 'OPEN' && lead.stage !== 'WON' && (
+          <DropdownMenuItem
+            variant="default"
+            onClick={() => onLost(lead)}
+            className="cursor-pointer"
+          >
+            <TrendingDown className="size-4" />
+            Mark as Lost
+          </DropdownMenuItem>
+        )}
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => onDelete(lead)}
+              className="cursor-pointer"
+            >
+              <Trash2 className="size-4" />
+              Delete
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export default function LeadsView({ user }: { user: SafeUser }) {
   const isAdmin = user.role === 'ADMIN';
   const openLeadDialog = useCrmStore((s) => s.openLeadDialog);
@@ -125,10 +180,14 @@ export default function LeadsView({ user }: { user: SafeUser }) {
   const pageCount = data?.pageCount ?? 0;
 
   const handleAssign = async (lead: SafeLead, value: string) => {
+    const target = value === 'UNASSIGNED' ? null : (users ?? []).find((u) => u.id === value) ?? null;
     try {
       await assignLead.mutateAsync({
         id: lead.id,
         assignedToId: value === 'UNASSIGNED' ? null : value,
+        assignee: target
+          ? { id: target.id, name: target.name, email: target.email, role: target.role }
+          : null,
       });
       toast.success(value === 'UNASSIGNED' ? 'Lead unassigned' : 'Lead assigned');
     } catch (err) {
@@ -179,14 +238,15 @@ export default function LeadsView({ user }: { user: SafeUser }) {
         </Button>
       </div>
 
-      {/* Toolbar */}
-      <div className="card-shadow flex flex-wrap items-center gap-5 rounded-xl border bg-card p-5">
-        <div className="relative min-w-[240px] flex-1">
+      {/* Toolbar - grid on mobile, inline flex on md+ */}
+      <div className="card-shadow grid grid-cols-2 gap-3 rounded-xl border bg-card p-4 md:flex md:flex-wrap md:items-center md:gap-5 md:p-5">
+        <div className="relative col-span-2 min-w-[240px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search leads..."
+            inputMode="search"
             className="h-10 rounded-[10px] border-border bg-white pl-9"
           />
         </div>
@@ -198,7 +258,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="data-[size=default]:h-10 w-[132px] rounded-[10px] border-border bg-white">
+          <SelectTrigger className="data-[size=default]:h-10 w-full rounded-[10px] border-border bg-white md:w-[132px]">
             <SelectValue placeholder="Stage" />
           </SelectTrigger>
           <SelectContent>
@@ -218,7 +278,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="data-[size=default]:h-10 w-[120px] rounded-[10px] border-border bg-white">
+          <SelectTrigger className="data-[size=default]:h-10 w-full rounded-[10px] border-border bg-white md:w-[120px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -238,7 +298,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="data-[size=default]:h-10 w-[150px] rounded-[10px] border-border bg-white">
+          <SelectTrigger className="data-[size=default]:h-10 w-full rounded-[10px] border-border bg-white md:w-[150px]">
             <SelectValue placeholder="Source" />
           </SelectTrigger>
           <SelectContent>
@@ -259,7 +319,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="data-[size=default]:h-10 w-[150px] rounded-[10px] border-border bg-white">
+            <SelectTrigger className="data-[size=default]:h-10 w-full rounded-[10px] border-border bg-white md:w-[150px]">
               <SelectValue placeholder="Assignee" />
             </SelectTrigger>
             <SelectContent>
@@ -281,7 +341,7 @@ export default function LeadsView({ user }: { user: SafeUser }) {
             setPage(1);
           }}
         >
-          <SelectTrigger className="data-[size=default]:h-10 w-[150px] rounded-[10px] border-border bg-white">
+          <SelectTrigger className="data-[size=default]:h-10 w-full rounded-[10px] border-border bg-white md:w-[150px]">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent>
@@ -329,134 +389,186 @@ export default function LeadsView({ user }: { user: SafeUser }) {
           </div>
         ) : (
           <>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-b bg-[#F8F9FC] hover:bg-[#F8F9FC] [&>th]:text-[11px] [&>th]:font-bold [&>th]:uppercase [&>th]:tracking-[0.12em] [&>th]:text-muted-foreground">
-                  <TableHead className="pl-5">Lead</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead>Value</TableHead>
-                  <TableHead>Assignee</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="w-10 pr-5" aria-label="Actions" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leads.map((lead) => {
-                  const fullName = `${lead.firstName} ${lead.lastName}`;
-                  return (
-                    <TableRow
-                      key={lead.id}
-                      onClick={() => openLeadDetail(lead.id)}
-                      className="cursor-pointer border-border/60 hover:bg-[#F7F8FC]"
-                    >
-                      <TableCell className="pl-5">
-                        <div className="flex items-center gap-3">
-                          <UserAvatar name={fullName} />
-                          <div className="min-w-0">
-                            <p className="truncate font-semibold text-foreground">{fullName}</p>
-                            <p className="truncate text-xs text-muted-foreground">
-                              {lead.email ?? '-'}
-                            </p>
+            {/* Desktop table (hidden on mobile) */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b bg-[#F8F9FC] hover:bg-[#F8F9FC] [&>th]:text-[11px] [&>th]:font-bold [&>th]:uppercase [&>th]:tracking-[0.12em] [&>th]:text-muted-foreground">
+                    <TableHead className="pl-5">Lead</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Source</TableHead>
+                    <TableHead>Stage</TableHead>
+                    <TableHead>Value</TableHead>
+                    <TableHead>Assignee</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="w-10 pr-5" aria-label="Actions" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {leads.map((lead) => {
+                    const fullName = `${lead.firstName} ${lead.lastName}`;
+                    return (
+                      <TableRow
+                        key={lead.id}
+                        onClick={() => openLeadDetail(lead.id)}
+                        className="cursor-pointer border-border/60 hover:bg-[#F7F8FC]"
+                      >
+                        <TableCell className="pl-5">
+                          <div className="flex items-center gap-3">
+                            <UserAvatar name={fullName} />
+                            <div className="min-w-0">
+                              <p className="truncate font-semibold text-foreground">{fullName}</p>
+                              <p className="truncate text-xs text-muted-foreground">
+                                {lead.email ?? '-'}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="block truncate text-sm text-muted-foreground">
-                          {lead.phone ?? '-'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <SourceBadge source={lead.source} />
-                      </TableCell>
-                      <TableCell>
-                        <StageBadge stage={lead.stage} />
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-semibold tabular-nums">{formatCurrency(lead.value)}</span>
-                      </TableCell>
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        {isAdmin ? (
-                          <Select
-                            value={lead.assignedToId ?? 'UNASSIGNED'}
-                            onValueChange={(v) => void handleAssign(lead, v)}
-                          >
-                            <SelectTrigger
-                              size="sm"
-                              className="data-[size=sm]:h-9 w-[150px] rounded-[10px] border-border bg-white"
-                              onClick={(e) => e.stopPropagation()}
+                        </TableCell>
+                        <TableCell>
+                          <span className="block truncate text-sm text-muted-foreground">
+                            {lead.phone ?? '-'}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <SourceBadge source={lead.source} />
+                        </TableCell>
+                        <TableCell>
+                          <StageBadge stage={lead.stage} />
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-semibold tabular-nums">{formatCurrency(lead.value)}</span>
+                        </TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          {isAdmin ? (
+                            <Select
+                              value={lead.assignedToId ?? 'UNASSIGNED'}
+                              onValueChange={(v) => void handleAssign(lead, v)}
                             >
-                              <SelectValue placeholder="Unassigned" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="UNASSIGNED">Unassigned</SelectItem>
-                              {(users ?? []).map((u) => (
-                                <SelectItem key={u.id} value={u.id}>
-                                  {u.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <UserAvatar name={lead.assignedTo?.name ?? 'Unassigned'} size="sm" />
-                            <span className="text-sm">
-                              {lead.assignedTo?.name ?? 'Unassigned'}
-                            </span>
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {formatDate(lead.createdAt)}
-                      </TableCell>
-                      <TableCell className="pr-5 text-right" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-8">
-                              <MoreHorizontal className="size-4" />
-                              <span className="sr-only">Lead actions</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem
-                              onClick={() => openLeadDialog(lead)}
-                              className="cursor-pointer"
-                            >
-                              <Pencil className="size-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            {lead.status === 'OPEN' && lead.stage !== 'WON' && (
-                              <DropdownMenuItem
-                                variant="default"
-                                onClick={() => setLostLead(lead)}
-                                className="cursor-pointer"
+                              <SelectTrigger
+                                size="sm"
+                                className="data-[size=sm]:h-9 w-[150px] rounded-[10px] border-border bg-white"
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                <TrendingDown className="size-4" />
-                                Mark as Lost
-                              </DropdownMenuItem>
-                            )}
-                            {isAdmin && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  variant="destructive"
-                                  onClick={() => setDeleteTarget(lead)}
-                                  className="cursor-pointer"
-                                >
-                                  <Trash2 className="size-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                                <SelectValue placeholder="Unassigned" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="UNASSIGNED">Unassigned</SelectItem>
+                                {(users ?? []).map((u) => (
+                                  <SelectItem key={u.id} value={u.id}>
+                                    {u.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <UserAvatar name={lead.assignedTo?.name ?? 'Unassigned'} size="sm" />
+                              <span className="text-sm">
+                                {lead.assignedTo?.name ?? 'Unassigned'}
+                              </span>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {formatDate(lead.createdAt)}
+                        </TableCell>
+                        <TableCell className="pr-5 text-right" onClick={(e) => e.stopPropagation()}>
+                          <LeadActionsMenu
+                            lead={lead}
+                            isAdmin={isAdmin}
+                            onEdit={openLeadDialog}
+                            onLost={setLostLead}
+                            onDelete={setDeleteTarget}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile card list (hidden on md+) */}
+            <div className="divide-y divide-border/60 md:hidden">
+              {leads.map((lead) => {
+                const fullName = `${lead.firstName} ${lead.lastName}`;
+                return (
+                  <div
+                    key={lead.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openLeadDetail(lead.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') openLeadDetail(lead.id);
+                    }}
+                    className="cursor-pointer px-4 py-3.5 transition-colors hover:bg-[#F7F8FC] active:bg-[#EEF0FF]/60"
+                  >
+                    <div className="flex items-start gap-3">
+                      <UserAvatar name={fullName} />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-foreground">{fullName}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {lead.company ?? lead.email ?? '-'}
+                        </p>
+                      </div>
+                      <div
+                        className="shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <LeadActionsMenu
+                          lead={lead}
+                          isAdmin={isAdmin}
+                          onEdit={openLeadDialog}
+                          onLost={setLostLead}
+                          onDelete={setDeleteTarget}
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-2.5 flex flex-wrap items-center gap-2 pl-[2px]">
+                      <StageBadge stage={lead.stage} />
+                      <SourceBadge source={lead.source} />
+                      <span className="ml-auto font-semibold tabular-nums">
+                        {formatCurrency(lead.value)}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center gap-2 pl-[2px]">
+                      {isAdmin ? (
+                        <Select
+                          value={lead.assignedToId ?? 'UNASSIGNED'}
+                          onValueChange={(v) => void handleAssign(lead, v)}
+                        >
+                          <SelectTrigger
+                            size="sm"
+                            className="data-[size=sm]:h-8 w-[150px] rounded-[10px] border-border bg-white text-xs"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <SelectValue placeholder="Unassigned" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="UNASSIGNED">Unassigned</SelectItem>
+                            {(users ?? []).map((u) => (
+                              <SelectItem key={u.id} value={u.id}>
+                                {u.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <UserAvatar name={lead.assignedTo?.name ?? 'Unassigned'} size="sm" />
+                          <span className="truncate text-xs text-muted-foreground">
+                            {lead.assignedTo?.name ?? 'Unassigned'}
+                          </span>
+                        </div>
+                      )}
+                      <span className="ml-auto shrink-0 text-xs text-muted-foreground">
+                        {formatDate(lead.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
             {/* Card footer: total + pagination */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 px-5 py-3.5">

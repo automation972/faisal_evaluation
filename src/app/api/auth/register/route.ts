@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword, signSession, setSessionCookie } from '@/lib/auth';
 import { handleApiError, ok, ApiError } from '@/lib/api-helpers';
+import { bustCache } from '@/lib/cache';
 import { registerSchema } from '@/lib/validation';
 import type { SafeUser } from '@/types';
 
@@ -36,6 +37,10 @@ export async function POST(req: NextRequest) {
         userId: user.id,
       },
     });
+
+    bustCache('hydrate:users');
+    bustCache('activities');
+    bustCache('analytics');
 
     const token = await signSession({ sub: user.id, role: user.role });
     await setSessionCookie(token);

@@ -1,4 +1,9 @@
 // Young10 Marketing CRM - server state layer (TanStack Query)
+//
+// Mutations use optimistic updates: the UI reflects the change instantly,
+// the request runs in the background, and any failure rolls the cache back
+// and shows a toast. This makes the app feel instant even though the remote
+// PostgreSQL adds ~200ms of latency to every round trip.
 
 'use client';
 
@@ -24,6 +29,56 @@ import type {
   TaskListResult,
   IngestLeadInput,
 } from '@/types';
+
+// ---------------------------------------------------------------------------
+// Optimistic cache helpers
+// ---------------------------------------------------------------------------
+
+type LeadAssignee = Pick<SafeUser, 'id' | 'name' | 'email' | 'role'>;
+
+function patchLeadInCaches(
+  qc: ReturnType<typeof useQueryClient>,
+  leadId: string,
+  patch: Partial<SafeLead>,
+): void {
+  qc.setQueryData<SafeLead>(['lead', leadId], (prev) => (prev ? { ...prev, ...patch } : prev));
+  qc.setQueriesData<LeadListResult>({ queryKey: ['leads'] }, (prev) => {
+    if (!prev) return prev;
+    return {
+      ...prev,
+      leads: prev.leads.map((lead) => (lead.id === leadId ? { ...lead, ...patch } : lead)),
+    };
+  });
+}
+
+function removeLeadFromCaches(
+  qc: ReturnType<typeof useQueryClient>,
+  leadId: string,
+): void {
+  qc.setQueryData<SafeLead>(['lead', leadId], undefined);
+  qc.setQueriesData<LeadListResult>({ queryKey: ['leads'] }, (prev) => {
+    if (!prev) return prev;
+    return {
+      ...prev,
+      leads: prev.leads.filter((lead) => lead.id !== leadId),
+      total: Math.max(0, prev.total - 1),
+    };
+  });
+}
+
+function patchTaskInCaches(
+  qc: ReturnType<typeof useQueryClient>,
+  taskId: string,
+  patch: Partial<SafeTask>,
+): void {
+  qc.setQueriesData<TaskListResult>({ queryKey: ['tasks'] }, (prev) => {
+    if (!prev) return prev;
+    return {
+      ...prev,
+      tasks: prev.tasks.map((task) => (task.id === taskId ? { ...task, ...patch } : task)),
+    };
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Auth
@@ -138,6 +193,7 @@ export function useLeads(params: LeadListParams) {
           sort: params.sort,
         })}`,
       ),
+    staleTime: 15_000,
     placeholderData: (prev) => prev,
   });
 }
@@ -180,9 +236,21 @@ export function useUpdateLead() {
   const qc = useQueryClient();
   return useMutation<SafeLead, Error, { id: string; data: Record<string, unknown> }>({
     mutationFn: ({ id, data }) => api.patch<SafeLead>(`/api/leads/${id}`, data),
+    // Optimistic: paint the change immediately (stage drags, mark lost, notes)
+    onMutate: async ({ id, data }) => {
+      await qc.cancelQueries({ queryKey: ['lead', id] });
+      patchLeadInCaches(qc, id, data as Partial<SafeLead>);
+    },
+    onError: () => {
+      // Server truth differs - reconcile from the API
+      qc.invalidateQueries({ queryKey: ['lead'] });
+      qc.invalidateQueries({ queryKey: ['leads'] });
+    },
     onSuccess: (lead) => {
       qc.setQueryData(['lead', lead.id], lead);
-      qc.invalidateQueries({ queryKey: ['leads'] });
+      patchLeadInCaches(qc, lead.id, lead);
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['analytics'] });
       qc.invalidateQueries({ queryKey: ['activities'] });
     },
@@ -193,8 +261,14 @@ export function useDeleteLead() {
   const qc = useQueryClient();
   return useMutation<void, Error, string>({
     mutationFn: (id) => api.delete<void>(`/api/leads/${id}`),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      removeLeadFromCaches(qc, id);
+    },
+    onError: (_err, id) => {
       qc.invalidateQueries({ queryKey: ['leads'] });
+      qc.invalidateQueries({ queryKey: ['lead', id] });
+    },
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['analytics'] });
       qc.invalidateQueries({ queryKey: ['activities'] });
     },
@@ -203,11 +277,31 @@ export function useDeleteLead() {
 
 export function useAssignLead() {
   const qc = useQueryClient();
-  return useMutation<SafeLead, Error, { id: string; assignedToId: string | null }>({
-    mutationFn: ({ id, assignedToId }) => api.post<SafeLead>(`/api/leads/${id}/assign`, { assignedToId }),
+  return useMutation<
+    SafeLead,
+    Error,
+    { id: string; assignedToId: string | null; assignee?: LeadAssignee | null }
+  >({
+    mutationFn: ({ id, assignedToId }) =>
+      api.post<SafeLead>(`/api/leads/${id}/assign`, { assignedToId }),
+    // Optimistic: the dropdown flips instantly; the server call completes in
+    // the background and any failure rolls the row back via refetch.
+    onMutate: async ({ id, assignedToId, assignee }) => {
+      await qc.cancelQueries({ queryKey: ['lead', id] });
+      patchLeadInCaches(qc, id, {
+        assignedToId: assignedToId ?? null,
+        assignedTo: assignee ?? null,
+      });
+    },
+    onError: (_err, { id }) => {
+      qc.invalidateQueries({ queryKey: ['lead', id] });
+      qc.invalidateQueries({ queryKey: ['leads'] });
+    },
     onSuccess: (lead) => {
       qc.setQueryData(['lead', lead.id], lead);
-      qc.invalidateQueries({ queryKey: ['leads'] });
+      patchLeadInCaches(qc, lead.id, lead);
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['analytics'] });
       qc.invalidateQueries({ queryKey: ['activities'] });
     },
@@ -231,6 +325,8 @@ export function useTasks(params: TaskListParams) {
         })}`,
       ),
     refetchInterval: ANALYTICS_REFRESH_MS,
+    refetchIntervalInBackground: false,
+    staleTime: 15_000,
     placeholderData: (prev) => prev,
   });
 }
@@ -261,8 +357,17 @@ export function useUpdateTask() {
   const qc = useQueryClient();
   return useMutation<SafeTask, Error, { id: string; data: Record<string, unknown> }>({
     mutationFn: ({ id, data }) => api.patch<SafeTask>(`/api/tasks/${id}`, data),
-    onSuccess: () => {
+    // Optimistic: the checkbox/toggle flips instantly
+    onMutate: async ({ id, data }) => {
+      patchTaskInCaches(qc, id, data as Partial<SafeTask>);
+    },
+    onError: () => {
       qc.invalidateQueries({ queryKey: ['tasks'] });
+    },
+    onSuccess: (task) => {
+      patchTaskInCaches(qc, task.id, task);
+    },
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ['analytics'] });
       qc.invalidateQueries({ queryKey: ['activities'] });
     },
@@ -289,6 +394,8 @@ export function useAnalytics() {
     queryKey: ['analytics'],
     queryFn: () => api.get<AnalyticsResult>('/api/analytics'),
     refetchInterval: ANALYTICS_REFRESH_MS,
+    refetchIntervalInBackground: false,
+    staleTime: ANALYTICS_REFRESH_MS,
   });
 }
 
@@ -297,6 +404,8 @@ export function useActivities(limit = 12) {
     queryKey: ['activities', limit],
     queryFn: () => api.get<SafeActivity[]>(`/api/activities?limit=${limit}`),
     refetchInterval: ANALYTICS_REFRESH_MS,
+    refetchIntervalInBackground: false,
+    staleTime: ANALYTICS_REFRESH_MS,
   });
 }
 

@@ -44,7 +44,7 @@ import { useActivities, useAnalytics, useTasks } from '@/hooks/use-crm';
 import { SOURCE_META, STAGE_META } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { useCrmStore } from '@/store/crm-store';
-import type { SafeActivity, SafeTask, SafeUser } from '@/types';
+import type { RepStat, SafeActivity, SafeTask, SafeUser } from '@/types';
 
 // ---------------------------------------------------------------------------
 // Building blocks
@@ -122,7 +122,7 @@ function StatCard({
   tone?: 'blue' | 'green';
 }) {
   return (
-    <Card className="card-shadow card-lift gap-3 p-5 xl:p-6">
+    <Card className="card-shadow card-lift gap-3 p-4 sm:p-5 xl:p-6">
       <div className="flex items-start justify-between gap-3">
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
         <span
@@ -204,10 +204,10 @@ function ActivityRow({ activity, onOpenLead }: { activity: SafeActivity; onOpenL
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-6 xl:grid-cols-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4 xl:gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="card-shadow rounded-xl border bg-card p-5 xl:p-6">
+          <div key={i} className="card-shadow rounded-xl border bg-card p-4 sm:p-4 sm:p-5 xl:p-6">
             <div className="flex items-start justify-between gap-3">
               <Skeleton className="h-3 w-20" />
               <Skeleton className="h-10 w-10 rounded-xl" />
@@ -217,37 +217,37 @@ function DashboardSkeleton() {
           </div>
         ))}
       </div>
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="card-shadow rounded-xl border bg-card p-5 xl:p-6 xl:col-span-2">
+      <div className="grid gap-3 sm:gap-4 xl:grid-cols-3 xl:gap-6">
+        <div className="card-shadow rounded-xl border bg-card p-4 sm:p-5 xl:col-span-2 xl:p-6">
           <Skeleton className="h-4 w-28" />
           <Skeleton className="mt-6 h-72 w-full" />
         </div>
-        <div className="card-shadow rounded-xl border bg-card p-5 xl:p-6">
+        <div className="card-shadow rounded-xl border bg-card p-4 sm:p-4 sm:p-5 xl:p-6">
           <Skeleton className="h-4 w-36" />
           <Skeleton className="mt-6 h-72 w-full" />
           <Skeleton className="mt-4 h-4 w-full" />
           <Skeleton className="mt-2 h-4 w-3/4" />
         </div>
       </div>
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="card-shadow rounded-xl border bg-card p-5 xl:p-6">
+      <div className="grid gap-3 sm:gap-4 xl:grid-cols-3 xl:gap-6">
+        <div className="card-shadow rounded-xl border bg-card p-4 sm:p-5 xl:p-6">
           <Skeleton className="h-4 w-28" />
           <Skeleton className="mt-6 h-56 w-full" />
         </div>
-        <div className="card-shadow rounded-xl border bg-card p-5 xl:p-6">
+        <div className="card-shadow rounded-xl border bg-card p-4 sm:p-5 xl:p-6">
           <Skeleton className="h-4 w-40" />
           <div className="mt-6">
             <ListSkeleton rows={5} />
           </div>
         </div>
-        <div className="card-shadow rounded-xl border bg-card p-5 xl:p-6">
+        <div className="card-shadow rounded-xl border bg-card p-4 sm:p-5 xl:p-6">
           <Skeleton className="h-4 w-28" />
           <div className="mt-6">
             <ListSkeleton rows={4} />
           </div>
         </div>
       </div>
-      <div className="card-shadow rounded-xl border bg-card p-5 xl:p-6">
+      <div className="card-shadow rounded-xl border bg-card p-4 sm:p-5 xl:p-6">
         <Skeleton className="h-4 w-40" />
         <div className="mt-6 space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -340,6 +340,30 @@ function SourceTooltip({
 const LEADERBOARD_GRID =
   'grid grid-cols-[1.75rem_auto_minmax(0,1fr)_3.5rem_4rem_5.75rem] items-center gap-x-3';
 
+/** Mobile leaderboard row - stacked layout without the fixed grid template. */
+function LeaderboardRowMobile({ rep, index }: { rep: RepStat; index: number }) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F7F8FC] sm:hidden">
+      <span
+        className={cn(
+          'flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-bold tabular-nums',
+          index === 0 && 'text-[#F59E0B]',
+        )}
+      >
+        {index + 1}
+      </span>
+      <UserAvatar name={rep.name} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium">{rep.name}</p>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          {rep.totalLeads} leads · <span className="font-semibold text-[#16A34A]">{rep.wonLeads} won</span> ·{' '}
+          {formatCurrency(rep.wonValue, { compact: true })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 const ACTIVITY_PREVIEW_COUNT = 4;
 
 export default function DashboardView({ user }: { user: SafeUser }) {
@@ -382,7 +406,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
   const hiddenActivityCount = activities ? Math.max(activities.length - ACTIVITY_PREVIEW_COUNT, 0) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <Section className="flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -404,7 +428,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
       ) : (
         <>
           {/* Row 1 - stat cards */}
-          <Section className="grid grid-cols-2 gap-6 xl:grid-cols-4" delay={0.04}>
+          <Section className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4 xl:gap-6" delay={0.04}>
             <StatCard
               label="Total Leads"
               value={analytics.totals.leads.toLocaleString('en-US')}
@@ -433,8 +457,8 @@ export default function DashboardView({ user }: { user: SafeUser }) {
           </Section>
 
           {/* Row 2 - trend + stage donut */}
-          <Section className="grid gap-6 xl:grid-cols-3" delay={0.08}>
-            <Card className="card-shadow card-lift p-5 xl:p-6 xl:col-span-2">
+          <Section className="grid gap-3 sm:gap-4 xl:grid-cols-3 xl:gap-6" delay={0.08}>
+            <Card className="card-shadow card-lift min-w-0 overflow-hidden p-4 sm:p-5 xl:p-6 xl:col-span-2">
               <CardHead
                 title="New leads per week"
                 action={
@@ -493,7 +517,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
               </div>
             </Card>
 
-            <Card className="card-shadow card-lift p-5 xl:p-6">
+            <Card className="card-shadow card-lift min-w-0 overflow-hidden p-4 sm:p-5 xl:p-6">
               <CardHead title="Pipeline by stage" />
               <div>
                 <div className="relative h-72">
@@ -555,8 +579,8 @@ export default function DashboardView({ user }: { user: SafeUser }) {
           </Section>
 
           {/* Row 3 - sources + follow-ups + activity */}
-          <Section className="grid items-start gap-6 xl:grid-cols-3" delay={0.12}>
-            <Card className="card-shadow card-lift p-5 xl:p-6">
+          <Section className="grid items-start gap-3 sm:gap-4 xl:grid-cols-3 xl:gap-6" delay={0.12}>
+            <Card className="card-shadow card-lift min-w-0 overflow-hidden p-4 sm:p-5 xl:p-6">
               <CardHead title="Lead sources" />
               <div className="h-56">
                 {sourceData.length === 0 ? (
@@ -581,7 +605,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
               </div>
             </Card>
 
-            <Card className="card-shadow card-lift p-5 xl:p-6">
+            <Card className="card-shadow card-lift min-w-0 overflow-hidden p-4 sm:p-5 xl:p-6">
               <CardHead
                 title="Upcoming follow-ups"
                 action={
@@ -638,7 +662,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
               )}
             </Card>
 
-            <Card className="card-shadow card-lift p-5 xl:p-6">
+            <Card className="card-shadow card-lift min-w-0 overflow-hidden p-4 sm:p-5 xl:p-6">
               <CardHead title="Activity feed" />
               {activities === undefined ? (
                 <ListSkeleton rows={4} />
@@ -684,56 +708,65 @@ export default function DashboardView({ user }: { user: SafeUser }) {
           {/* Row 4 - leaderboard (admin) or personal focus (sales rep) */}
           <Section delay={0.16}>
             {user.role === 'ADMIN' ? (
-              <Card className="card-shadow card-lift p-5 xl:p-6">
+              <Card className="card-shadow card-lift min-w-0 overflow-hidden p-4 sm:p-5 xl:p-6">
                 <CardHead title="Team leaderboard" />
                 {leaderboard.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No rep activity recorded yet.</p>
                 ) : (
                   <div>
-                    <div
-                      className={cn(
-                        LEADERBOARD_GRID,
-                        'border-b border-border pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground',
-                      )}
-                    >
-                      <span>#</span>
-                      <span aria-hidden />
-                      <span>Rep</span>
-                      <span className="text-right">Leads</span>
-                      <span className="text-right">Won</span>
-                      <span className="text-right">Revenue</span>
-                    </div>
-                    <div className="pt-1">
+                    {/* Mobile rows (hidden on sm+) */}
+                    <div className="sm:hidden">
                       {leaderboard.map((rep, index) => (
-                        <div key={rep.userId} className={cn(LEADERBOARD_GRID, '-mx-2 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F7F8FC]')}>
-                          <span
-                            className={cn(
-                              'flex h-7 w-7 items-center justify-center rounded-md bg-muted text-xs font-bold tabular-nums',
-                              index === 0 && 'text-[#F59E0B]',
-                            )}
-                          >
-                            {index + 1}
-                          </span>
-                          <UserAvatar name={rep.name} />
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-medium">{rep.name}</p>
-                            <p className="truncate text-xs text-muted-foreground">{rep.email}</p>
-                          </div>
-                          <span className="text-right text-sm tabular-nums">{rep.totalLeads}</span>
-                          <span className="text-right text-sm font-semibold tabular-nums text-[#16A34A]">
-                            {rep.wonLeads}
-                          </span>
-                          <span className="text-right text-sm font-semibold tabular-nums">
-                            {formatCurrency(rep.wonValue, { compact: true })}
-                          </span>
-                        </div>
+                        <LeaderboardRowMobile key={rep.userId} rep={rep} index={index} />
                       ))}
+                    </div>
+                    {/* Desktop grid (hidden on mobile) */}
+                    <div className="hidden sm:block">
+                      <div
+                        className={cn(
+                          LEADERBOARD_GRID,
+                          'border-b border-border pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground',
+                        )}
+                      >
+                        <span>#</span>
+                        <span aria-hidden />
+                        <span>Rep</span>
+                        <span className="text-right">Leads</span>
+                        <span className="text-right">Won</span>
+                        <span className="text-right">Revenue</span>
+                      </div>
+                      <div className="pt-1">
+                        {leaderboard.map((rep, index) => (
+                          <div key={rep.userId} className={cn(LEADERBOARD_GRID, '-mx-2 rounded-lg px-2 py-2.5 transition-colors hover:bg-[#F7F8FC]')}>
+                            <span
+                              className={cn(
+                                'flex h-7 w-7 items-center justify-center rounded-md bg-muted text-xs font-bold tabular-nums',
+                                index === 0 && 'text-[#F59E0B]',
+                              )}
+                            >
+                              {index + 1}
+                            </span>
+                            <UserAvatar name={rep.name} />
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium">{rep.name}</p>
+                              <p className="truncate text-xs text-muted-foreground">{rep.email}</p>
+                            </div>
+                            <span className="text-right text-sm tabular-nums">{rep.totalLeads}</span>
+                            <span className="text-right text-sm font-semibold tabular-nums text-[#16A34A]">
+                              {rep.wonLeads}
+                            </span>
+                            <span className="text-right text-sm font-semibold tabular-nums">
+                              {formatCurrency(rep.wonValue, { compact: true })}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
               </Card>
             ) : (
-              <Card className="card-shadow card-lift p-5 xl:p-6">
+              <Card className="card-shadow card-lift min-w-0 overflow-hidden p-4 sm:p-5 xl:p-6">
                 <CardHead title="My focus" />
                 <div>
                   <div className="grid grid-cols-3 gap-4">

@@ -103,7 +103,7 @@ function PipelineColumn({
 
   return (
     <div
-      className={`flex min-w-[280px] flex-1 snap-start flex-col gap-2.5 rounded-2xl border border-dashed border-transparent bg-[#F4F5FA] p-3 transition-colors duration-200 ${
+      className={`flex min-w-[260px] flex-1 snap-start flex-col gap-2.5 rounded-2xl border border-dashed border-transparent bg-[#F4F5FA] p-3 transition-colors duration-200 sm:min-w-[280px] ${
         draggingActive && isOver ? 'border-2 border-[#384BFE]/40 bg-[#EEF0FF]/40' : ''
       }`}
     >

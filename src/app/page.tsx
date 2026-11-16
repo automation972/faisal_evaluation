@@ -45,7 +45,7 @@ function CrmWorkspace() {
         <Topbar user={user} />
 
         <main
-          className="scrollbar-slim flex-1 overflow-y-auto p-4 md:p-6 lg:p-8"
+          className="scrollbar-slim flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6 lg:p-8"
           aria-label="CRM workspace"
         >
           {view === 'dashboard' && <DashboardView user={user} />}

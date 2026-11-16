@@ -13,6 +13,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { handleApiError, fail } from '@/lib/api-helpers';
+import { bustCache } from '@/lib/cache';
 import { ingestLeadSchema } from '@/lib/validation';
 import { rateLimit } from '@/lib/rate-limit';
 import type { IngestResponse } from '@/types';
@@ -44,6 +45,8 @@ export async function POST(req: NextRequest) {
     }
     const input = ingestLeadSchema.parse(body);
 
+    // Create is ONE round trip; activity + lastUsedAt are fire-and-forget
+    // (webhooks must return as fast as possible).
     const lead = await db.lead.create({
       data: {
         firstName: input.firstName,
@@ -62,15 +65,24 @@ export async function POST(req: NextRequest) {
       select: { id: true, firstName: true, lastName: true, company: true },
     });
 
-    await db.activity.create({
-      data: {
-        type: 'EXTERNAL_LEAD',
-        message: `New lead ${lead.firstName} ${lead.lastName} received via API key "${keyRecord.name}"`,
-        leadId: lead.id,
-      },
-    });
+    void db.activity
+      .create({
+        data: {
+          type: 'EXTERNAL_LEAD',
+          message: `New lead ${lead.firstName} ${lead.lastName} received via API key "${keyRecord.name}"`,
+          leadId: lead.id,
+        },
+      })
+      .catch(() => null);
 
-    await db.apiKey.update({ where: { id: keyRecord.id }, data: { lastUsedAt: new Date() } });
+    void db.apiKey
+      .update({ where: { id: keyRecord.id }, data: { lastUsedAt: new Date() } })
+      .catch(() => null);
+
+    bustCache('leads:list');
+    bustCache('hydrate:leads');
+    bustCache('analytics');
+    bustCache('activities');
 
     const res = {
       leadId: lead.id,

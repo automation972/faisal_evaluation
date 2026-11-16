@@ -76,7 +76,7 @@ export async function clearSessionCookie(): Promise<void> {
  * so a tiny TTL cache keeps hot requests at ~0ms while still propagating
  * deactivations / role changes within a few seconds.
  */
-const SESSION_CACHE_TTL_MS = 15_000;
+const SESSION_CACHE_TTL_MS = 60_000;
 
 const globalForAuth = globalThis as unknown as {
   __y10SessionCache: Map<string, { user: SafeUser; expires: number }> | undefined;

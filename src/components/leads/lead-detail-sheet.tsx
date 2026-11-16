@@ -224,10 +224,14 @@ export function LeadDetailSheet() {
 
   const handleAssign = async (value: string) => {
     if (!lead) return;
+    const target = value === UNASSIGNED ? null : (users ?? []).find((u) => u.id === value) ?? null;
     try {
       await assignLead.mutateAsync({
         id: lead.id,
         assignedToId: value === UNASSIGNED ? null : value,
+        assignee: target
+          ? { id: target.id, name: target.name, email: target.email, role: target.role }
+          : null,
       });
       toast.success(value === UNASSIGNED ? 'Lead unassigned' : 'Lead assigned');
     } catch (err) {

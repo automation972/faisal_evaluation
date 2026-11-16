@@ -114,5 +114,5 @@ export const ROLE_META: Record<UserRoleValue, { label: string }> = {
 
 export const SESSION_COOKIE = 'y10_session';
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days in seconds
-export const ANALYTICS_REFRESH_MS = 20000; // near-real-time dashboard refresh
+export const ANALYTICS_REFRESH_MS = 45_000; // near-real-time dashboard refresh (server-side cached)
 export const DEFAULT_PAGE_SIZE = 20;
