@@ -603,33 +603,35 @@ export default function DashboardView({ user }: { user: SafeUser }) {
                   <p className="mt-1 text-xs text-muted-foreground">Tasks with upcoming due dates will appear here</p>
                 </div>
               ) : (
-                <div className="space-y-1">
-                  {upcomingTasks.map((task) => {
-                    const chip = dueChip(task);
-                    return (
-                      <button
-                        key={task.id}
-                        type="button"
-                        onClick={() => setView('tasks')}
-                        className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-[#F7F8FC]"
-                      >
-                        <PriorityBadge priority={task.priority} className="shrink-0" />
-                        <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{task.title}</span>
-                        {chip ? (
-                          <span
-                            className={cn(
-                              'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium',
-                              chip.className,
-                            )}
-                          >
-                            {chip.label}
-                          </span>
-                        ) : (
-                          <span className="shrink-0 text-xs text-muted-foreground">No due date</span>
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="scrollbar-slim h-56 overflow-y-auto">
+                  <div className="space-y-1">
+                    {upcomingTasks.map((task) => {
+                      const chip = dueChip(task);
+                      return (
+                        <button
+                          key={task.id}
+                          type="button"
+                          onClick={() => setView('tasks')}
+                          className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-[#F7F8FC]"
+                        >
+                          <PriorityBadge priority={task.priority} className="shrink-0" />
+                          <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{task.title}</span>
+                          {chip ? (
+                            <span
+                              className={cn(
+                                'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                chip.className,
+                              )}
+                            >
+                              {chip.label}
+                            </span>
+                          ) : (
+                            <span className="shrink-0 text-xs text-muted-foreground">No due date</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </Card>
@@ -647,13 +649,8 @@ export default function DashboardView({ user }: { user: SafeUser }) {
                   <p className="mt-1 text-xs text-muted-foreground">Team actions will show up here in real time</p>
                 </div>
               ) : (
-                <div>
-                  <div
-                    className={cn(
-                      'space-y-2',
-                      showAllActivity && 'scrollbar-slim max-h-72 overflow-y-auto pr-1',
-                    )}
-                  >
+                <div className="flex h-56 flex-col">
+                  <div className="scrollbar-slim min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
                     {visibleActivities.map((item) => {
                       const leadId = item.lead?.id ?? null;
                       return (
@@ -669,7 +666,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
                     <button
                       type="button"
                       onClick={() => setShowAllActivity((prev) => !prev)}
-                      className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/30 hover:bg-[#F7F8FC] hover:text-primary"
+                      className="mt-2 flex w-full shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/30 hover:bg-[#F7F8FC] hover:text-primary"
                     >
                       {showAllActivity ? 'Show less' : `View more (${hiddenActivityCount})`}
                       <ChevronDown
