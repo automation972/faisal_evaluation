@@ -154,7 +154,7 @@ export default function AuthScreen() {
   const passwordToggleLabel = showPassword ? 'Hide password' : 'Show password';
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#FBFBFE]">
+    <div className="flex min-h-screen flex-col bg-[#EFF0F5]">
       {/* Ink contact bar - identical to the site header chrome */}
       <header className="ink-gradient flex h-11 shrink-0 items-center justify-between px-4 text-[12.5px] text-white/90 md:px-8">
         <div className="flex items-center gap-6">
@@ -204,8 +204,8 @@ export default function AuthScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: 'easeOut' }}
           >
-            <Logo height={64} className="hidden lg:inline-flex" />
-            <div className="mt-10 flex items-center gap-3 lg:mt-12">
+            <Logo height={96} className="hidden lg:inline-flex" />
+            <div className="mt-12 flex items-center gap-3 lg:mt-16">
               <span className="h-[3px] w-9 rounded-full bg-primary" aria-hidden="true" />
               <p className="text-[13px] font-bold uppercase tracking-[0.18em] text-primary">
                 Your growth, in focus
@@ -232,7 +232,7 @@ export default function AuthScreen() {
             className="w-full max-w-[460px] justify-self-center"
           >
             <div className="card-float rounded-2xl border border-white/70 bg-white px-7 py-8 sm:px-9 sm:py-9">
-              <Logo height={48} className="lg:hidden" />
+              <Logo height={56} className="lg:hidden" />
 
               <motion.div
                 key={mode}
@@ -394,7 +394,7 @@ export default function AuthScreen() {
         </div>
       </main>
 
-      <footer className="shrink-0 border-t border-border/70 bg-white/60 px-6 py-4 md:px-10">
+      <footer className="shrink-0 border-t border-[#DFE1EC] bg-[#F4F5F9]/80 px-6 py-4 md:px-10">
         <div className="mx-auto flex max-w-6xl items-center justify-between text-xs text-muted-foreground">
           <p>
             &copy; {new Date().getFullYear()} <span className="font-semibold text-foreground">Young10 Marketing</span>
