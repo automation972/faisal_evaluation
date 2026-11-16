@@ -152,6 +152,66 @@
     0 10px 28px -14px rgba(16, 18, 35, 0.1);
 }
 
+/* Card hover lift — soft rise, brand glow and border warm-up */
+.card-lift {
+  position: relative;
+  isolation: isolate;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+}
+.card-lift::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(120% 90% at 50% -20%, rgba(56, 75, 254, 0.09), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  border-color: rgba(56, 75, 254, 0.32);
+  box-shadow:
+    0 2px 4px rgba(16, 18, 35, 0.05),
+    0 20px 48px -18px rgba(31, 34, 78, 0.24),
+    0 12px 32px -14px rgba(56, 75, 254, 0.2);
+}
+.card-lift:hover::before {
+  opacity: 1;
+}
+/* Icon micro-interaction inside lifted cards */
+.card-lift .stat-icon {
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease;
+}
+.card-lift:hover .stat-icon {
+  transform: scale(1.1) rotate(-3deg);
+}
+.card-lift:hover .stat-icon-blue {
+  box-shadow: 0 10px 24px -10px rgba(56, 75, 254, 0.55);
+}
+.card-lift:hover .stat-icon-green {
+  box-shadow: 0 10px 24px -10px rgba(22, 163, 74, 0.55);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-lift,
+  .card-lift::before,
+  .card-lift .stat-icon {
+    transition: none;
+  }
+  .card-lift:hover {
+    transform: none;
+  }
+  .card-lift:hover .stat-icon {
+    transform: none;
+  }
+}
+
 /* Deeper float used on the auth card */
 .card-float {
   box-shadow:

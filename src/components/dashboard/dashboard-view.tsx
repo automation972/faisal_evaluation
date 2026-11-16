@@ -122,13 +122,15 @@ function StatCard({
   tone?: 'blue' | 'green';
 }) {
   return (
-    <Card className="card-shadow gap-3 p-5 xl:p-6">
+    <Card className="card-shadow card-lift gap-3 p-5 xl:p-6">
       <div className="flex items-start justify-between gap-3">
         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
         <span
           className={cn(
-            'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
-            tone === 'green' ? 'bg-[#E4F7EC] text-[#16A34A]' : 'bg-[#EEF0FF] text-primary',
+            'stat-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
+            tone === 'green'
+              ? 'stat-icon-green bg-[#E4F7EC] text-[#16A34A]'
+              : 'stat-icon-blue bg-[#EEF0FF] text-primary',
           )}
         >
           <Icon className="h-5 w-5" />
@@ -432,7 +434,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
 
           {/* Row 2 - trend + stage donut */}
           <Section className="grid gap-6 xl:grid-cols-3" delay={0.08}>
-            <Card className="card-shadow p-5 xl:p-6 xl:col-span-2">
+            <Card className="card-shadow card-lift p-5 xl:p-6 xl:col-span-2">
               <CardHead
                 title="New leads per week"
                 action={
@@ -491,7 +493,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
               </div>
             </Card>
 
-            <Card className="card-shadow p-5 xl:p-6">
+            <Card className="card-shadow card-lift p-5 xl:p-6">
               <CardHead title="Pipeline by stage" />
               <div>
                 <div className="relative h-72">
@@ -554,7 +556,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
 
           {/* Row 3 - sources + follow-ups + activity */}
           <Section className="grid items-start gap-6 xl:grid-cols-3" delay={0.12}>
-            <Card className="card-shadow p-5 xl:p-6">
+            <Card className="card-shadow card-lift p-5 xl:p-6">
               <CardHead title="Lead sources" />
               <div className="h-56">
                 {sourceData.length === 0 ? (
@@ -579,7 +581,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
               </div>
             </Card>
 
-            <Card className="card-shadow p-5 xl:p-6">
+            <Card className="card-shadow card-lift p-5 xl:p-6">
               <CardHead
                 title="Upcoming follow-ups"
                 action={
@@ -636,7 +638,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
               )}
             </Card>
 
-            <Card className="card-shadow p-5 xl:p-6">
+            <Card className="card-shadow card-lift p-5 xl:p-6">
               <CardHead title="Activity feed" />
               {activities === undefined ? (
                 <ListSkeleton rows={4} />
@@ -682,7 +684,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
           {/* Row 4 - leaderboard (admin) or personal focus (sales rep) */}
           <Section delay={0.16}>
             {user.role === 'ADMIN' ? (
-              <Card className="card-shadow p-5 xl:p-6">
+              <Card className="card-shadow card-lift p-5 xl:p-6">
                 <CardHead title="Team leaderboard" />
                 {leaderboard.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No rep activity recorded yet.</p>
@@ -731,7 +733,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
                 )}
               </Card>
             ) : (
-              <Card className="card-shadow p-5 xl:p-6">
+              <Card className="card-shadow card-lift p-5 xl:p-6">
                 <CardHead title="My focus" />
                 <div>
                   <div className="grid grid-cols-3 gap-4">
