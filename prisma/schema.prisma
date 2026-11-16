@@ -1,32 +1,177 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Young10 Marketing CRM - Prisma Schema
+// PostgreSQL (Neon)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum UserRole {
+  ADMIN
+  SALES_REP
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum LeadStage {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  WON
+}
+
+enum LeadStatus {
+  OPEN
+  LOST
+}
+
+enum LeadSource {
+  WEBSITE
+  REFERRAL
+  SOCIAL_MEDIA
+  PAID_ADS
+  EMAIL_CAMPAIGN
+  COLD_CALL
+  EVENT
+  OTHER
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum ActivityType {
+  USER_REGISTERED
+  LEAD_CREATED
+  LEAD_UPDATED
+  LEAD_DELETED
+  STAGE_CHANGED
+  LEAD_ASSIGNED
+  LEAD_LOST
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_COMPLETED
+  TASK_DELETED
+  EXTERNAL_LEAD
+  API_KEY_CREATED
+  API_KEY_REVOKED
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  role         UserRole   @default(SALES_REP)
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  assignedLeads    Lead[]  @relation("LeadAssignee")
+  createdLeads     Lead[]  @relation("LeadCreator")
+  assignedTasks    Task[]  @relation("TaskAssignee")
+  createdTasks     Task[]  @relation("TaskCreator")
+  activities       Activity[]
+  createdApiKeys   ApiKey[]
+}
+
+model Lead {
+  id               String     @id @default(cuid())
+  firstName        String
+  lastName         String
+  email            String?
+  phone            String?
+  company          String?
+  jobTitle         String?
+  source           LeadSource @default(WEBSITE)
+  stage            LeadStage  @default(NEW)
+  status           LeadStatus @default(OPEN)
+  value            Float      @default(0)
+  notes            String?
+  lastContactedAt  DateTime?
+  createdViaApi    Boolean    @default(false)
+  assignedToId     String?
+  createdById      String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  assignedTo  User?      @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy   User?      @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  tasks       Task[]
+  activities  Activity[]
+
+  @@index([stage])
+  @@index([status])
+  @@index([assignedToId])
+  @@index([source])
+  @@index([createdAt])
+}
+
+model Task {
+  id           String       @id @default(cuid())
+  title        String
+  description  String?
+  dueDate      DateTime?
+  priority     TaskPriority @default(MEDIUM)
+  status       TaskStatus   @default(PENDING)
+  completedAt  DateTime?
+  leadId       String?
+  assignedToId String?
+  createdById  String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  lead        Lead?  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  assignedTo  User?  @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy   User?  @relation("TaskCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([assignedToId])
+  @@index([dueDate])
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  type      ActivityType
+  message   String
+  userId    String?
+  leadId    String?
+  createdAt DateTime     @default(now())
+
+  user User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  lead Lead?  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  name       String
+  key        String    @unique
+  prefix     String
+  active     Boolean   @default(true)
+  lastUsedAt DateTime?
+  createdById String?
+  createdAt  DateTime  @default(now())
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
 }

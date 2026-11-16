@@ -6,8 +6,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-kumbh-sans), "Kumbh Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -37,79 +37,102 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-ink: var(--ink);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 6px);
 }
 
+/*
+  Young10 Marketing brand system
+  - Brand blue  #384BFE  (site --theme)
+  - Ink / dark  #0F0D1D  (header & dark sections)
+  - Logo black  #1E1B1C
+  - Text gray   #7A7A7A
+  - Surface     #FAFAFA
+*/
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+  --brand: #384bfe;
+  --brand-deep: #2b3ad1;
+  --ink: #0f0d1d;
+  --background: #ffffff;
+  --foreground: #101223;
+  --card: #ffffff;
+  --card-foreground: #101223;
+  --popover: #ffffff;
+  --popover-foreground: #101223;
+  --primary: #384bfe;
+  --primary-foreground: #ffffff;
+  --secondary: #eaefff;
+  --secondary-foreground: #26309c;
+  --muted: #f4f5fb;
+  --muted-foreground: #7a7a7a;
+  --accent: #eaefff;
+  --accent-foreground: #26309c;
+  --destructive: #dc2626;
+  --border: #e6e8f2;
+  --input: #e2e5ef;
+  --ring: #384bfe;
+  --success: #16a34a;
+  --success-soft: #e4f7ec;
+  --warning: #f59e0b;
+  --warning-soft: #fef3df;
+  --danger: #dc2626;
+  --danger-soft: #fde7e7;
+  --info: #0ea5b7;
+  --info-soft: #e2f7fa;
+  --chart-1: #384bfe;
+  --chart-2: #0ea5b7;
+  --chart-3: #7c3aed;
+  --chart-4: #f59e0b;
+  --chart-5: #16a34a;
+  --sidebar: #0f0d1d;
+  --sidebar-foreground: #b6b8cf;
+  --sidebar-primary: #384bfe;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1d1b2e;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #262439;
+  --sidebar-ring: #384bfe;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0f0d1d;
+  --foreground: #ecedf5;
+  --card: #1d1b2e;
+  --card-foreground: #ecedf5;
+  --popover: #1d1b2e;
+  --popover-foreground: #ecedf5;
+  --primary: #5a68ff;
+  --primary-foreground: #ffffff;
+  --secondary: #262439;
+  --secondary-foreground: #ecedf5;
+  --muted: #262439;
+  --muted-foreground: #9a9cb5;
+  --accent: #262439;
+  --accent-foreground: #ecedf5;
+  --destructive: #ef4444;
+  --border: #2b2940;
+  --input: #2b2940;
+  --ring: #5a68ff;
+  --sidebar: #14121f;
+  --sidebar-foreground: #b6b8cf;
+  --sidebar-accent: #262439;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2b2940;
+  --sidebar-ring: #5a68ff;
 }
 
 @layer base {
@@ -118,5 +141,101 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03";
   }
+  ::selection {
+    background: rgba(56, 75, 254, 0.18);
+  }
+}
+
+/* Brand helpers ---------------------------------------------------------------- */
+
+.brand-gradient {
+  background: linear-gradient(135deg, #384bfe 0%, #5a68ff 55%, #7c3aed 130%);
+}
+
+.ink-gradient {
+  background: linear-gradient(160deg, #0f0d1d 0%, #171429 60%, #1d1b3a 100%);
+}
+
+.brand-ring {
+  box-shadow: 0 0 0 1px rgba(56, 75, 254, 0.25), 0 8px 30px -6px rgba(56, 75, 254, 0.45);
+}
+
+.card-shadow {
+  box-shadow: 0 1px 2px rgba(16, 18, 35, 0.04), 0 8px 24px -12px rgba(16, 18, 35, 0.12);
+}
+
+.text-gradient-brand {
+  background: linear-gradient(120deg, #384bfe, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Custom scrollbars ------------------------------------------------------------ */
+
+.scrollbar-slim {
+  scrollbar-width: thin;
+  scrollbar-color: #c3c8e6 transparent;
+}
+.scrollbar-slim::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb {
+  background-color: #c3c8e6;
+  border-radius: 999px;
+}
+.scrollbar-slim::-webkit-scrollbar-thumb:hover {
+  background-color: #9aa1cc;
+}
+.scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3752 transparent;
+}
+.scrollbar-dark::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-dark::-webkit-scrollbar-thumb {
+  background-color: #3a3752;
+  border-radius: 999px;
+}
+
+/* Pinwheel backdrop used on the auth screen ------------------------------------ */
+
+.pinwheel-field {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.14) 1px, transparent 0);
+  background-size: 26px 26px;
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(3deg);
+  }
+}
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 22s linear infinite;
 }
