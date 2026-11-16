@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "app": {
+      "root": ".",
+      "framework": "nextjs"
+    },
+    "lead-relay-service": {
+      "root": "services/lead-relay-service",
+      "runtime": "node",
+      "entrypoint": "server.js",
+      "bindings": [
+        { "type": "service", "service": "app", "format": "url", "env": "APP_URL" }
+      ]
+    },
+    "lead-scoring-service": {
+      "root": "services/lead-scoring-service",
+      "framework": "fastapi"
+    }
+  },
+  "rewrites": [
+    { "source": "/relay/:path*", "destination": { "service": "lead-relay-service" } },
+    { "source": "/scoring/:path*", "destination": { "service": "lead-scoring-service" } },
+    { "source": "/(.*)", "destination": { "service": "app" } }
+  ]
+}

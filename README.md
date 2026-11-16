@@ -417,19 +417,54 @@ The sign-in screen also includes one-click demo buttons that autofill these cred
 
 ## Deployment
 
-The stack deploys cleanly to **Vercel** (frontend + **Node.js** API layer) with **Neon** (**PostgreSQL**):
+### Vercel — one project, three services (recommended)
+
+The repository ships with a `vercel.json` that defines a **single Vercel project** containing all three components as services, with shared environment variables and one domain:
+
+| Service | Stack | Public path | Cross-service calls |
+|---|---|---|---|
+| `app` | **Next.js 16** + **Node.js** REST API | `/` (catch-all) | — |
+| `lead-relay-service` | **Node.js** (`node:http`, zero deps) | `/relay/*` | → `app` via the `APP_URL` **binding** (forwards leads to `POST /api/v1/leads/ingest`) |
+| `lead-scoring-service` | **Python / FastAPI** | `/scoring/*` | none — called externally |
 
 ```bash
-# environment variables required in production
+vercel        # first deploy — imports all three services as one project
+vercel dev    # runs every service locally with bindings injected
+```
+
+Environment variables to set in the Vercel dashboard (Project → Settings → Environment Variables):
+
+| Variable | Service | Purpose |
+|---|---|---|
+| `DATABASE_URL` | app | Neon **PostgreSQL** connection string |
+| `JWT_SECRET` | app | Signs the httpOnly session cookies |
+| `INGEST_API_KEY` | lead-relay-service | CRM API key used to forward captured leads — issue one in the CRM (**Admin → API Keys**) |
+| `RELAY_SECRET` | lead-relay-service | Optional shared secret for provider webhooks (`x-relay-secret` header) |
+
+> The `APP_URL` binding is injected by Vercel automatically at runtime — never set it yourself.
+
+After deploying:
+
+- **Provider webhooks** (Typeform, HubSpot, Zapier, ad platforms) should target `https://<your-domain>/relay/webhook` — they may send JSON **or** form-encoded bodies.
+- **Scoring requests** go to `https://<your-domain>/scoring/score` and `POST /scoring/score/batch`.
+
+### Self-hosted
+
+Any **Node.js** host works (Railway, Render, Fly.io, a VPS behind Nginx/Caddy) as long as the environment variables below are provided, plus one extra when running the relay on a separate host:
+
+```bash
+# app (Next.js + Node.js API)
 DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require"
 JWT_SECRET="<long-random-secret>"
+
+# lead-relay-service (points at the app's public origin)
+INGEST_URL="https://<your-app-domain>/api/v1/leads/ingest"
+INGEST_API_KEY="<key issued in CRM: Admin → API Keys>"
 
 # generate the production client and build
 bunx prisma generate && bunx prisma db push
 bun run build
 ```
-
-Any **Node.js** host works (Railway, Render, Fly.io, a VPS behind Nginx/Caddy) as long as the two environment variables above are provided.
 
 ---
 
@@ -459,8 +494,9 @@ Any **Node.js** host works (Railway, Render, Fly.io, a VPS behind Nginx/Caddy) a
 │  ├─ lib/                        # db · auth · api-helpers · validation · rate-limit
 │  └─ types/                      # shared TypeScript contracts
 ├─ services/
-│  ├─ lead-relay-service/         # Node.js webhook relay (port 4050)
-│  └─ lead-scoring-service/       # Python / FastAPI lead scoring (port 4060)
+│  ├─ lead-relay-service/         # Node.js webhook relay — Vercel service @ /relay/*
+│  └─ lead-scoring-service/       # Python / FastAPI lead scoring — Vercel service @ /scoring/*
+├─ vercel.json                    # one Vercel project: app + relay + scorer (services, rewrites, binding)
 ├─ prisma/
 │  ├─ schema.prisma               # PostgreSQL schema (5 models, 7 enums)
 │  └─ seed.ts                     # demo data seeder

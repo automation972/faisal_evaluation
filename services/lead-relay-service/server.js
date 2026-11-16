@@ -17,12 +17,17 @@
  *     5. Retries transient failures with exponential backoff
  *
  * Configuration (environment variables):
- *   RELAY_PORT        — port to listen on                 (default 4050)
- *   INGEST_URL        — CRM intake endpoint               (default http://localhost:3000/api/v1/leads/ingest)
+ *   PORT              — port to listen on (injected automatically on Vercel; default 4050)
+ *   RELAY_PORT        — port override for self-hosted runs (local dev)
+ *   INGEST_URL        — full CRM intake URL (self-hosted / docker-compose setups)
+ *   APP_URL           — Vercel service binding (injected): internal base URL of the
+ *                       CRM "app" service — the relay derives the ingest endpoint
+ *                       <APP_URL>/api/v1/leads/ingest from it. Do not set manually.
  *   INGEST_API_KEY    — CRM intake API key                (required for forwarding)
  *   RELAY_SECRET      — shared secret providers must send (optional)
  *
- * Endpoints:
+ * Endpoints (on Vercel this service is mounted under the public path /relay/*,
+ * so the same routes answer both /relay/webhook and /webhook):
  *   POST /webhook   — receive + forward a lead
  *   GET  /health    — liveness probe
  * ---------------------------------------------------------------------------
@@ -31,10 +36,29 @@
 import http from 'node:http';
 import crypto from 'node:crypto';
 
-const PORT = Number(process.env.RELAY_PORT || 4050);
-const INGEST_URL = process.env.INGEST_URL || 'http://localhost:3000/api/v1/leads/ingest';
+const PORT = Number(process.env.PORT || process.env.RELAY_PORT || 4050);
+
+/**
+ * Resolve the CRM ingest endpoint.
+ * Priority: explicit INGEST_URL (self-hosted) → APP_URL service binding
+ * (Vercel injects the "app" service's internal base URL) → localhost default.
+ */
+function resolveIngestUrl() {
+  if (process.env.INGEST_URL) return process.env.INGEST_URL;
+  const appUrl = process.env.APP_URL;
+  if (appUrl) {
+    const base = appUrl.endsWith('/') ? appUrl : `${appUrl}/`;
+    return new URL('api/v1/leads/ingest', base).href;
+  }
+  return 'http://localhost:3000/api/v1/leads/ingest';
+}
+
+const INGEST_URL = resolveIngestUrl();
 const INGEST_API_KEY = process.env.INGEST_API_KEY || '';
 const RELAY_SECRET = process.env.RELAY_SECRET || '';
+
+/** Public path prefix Vercel mounts this service under — stripped on arrival. */
+const MOUNT_PREFIX = '/relay';
 
 const MAX_BODY_BYTES = 32 * 1024;
 const FORWARD_RETRIES = 3;
@@ -153,8 +177,13 @@ function sendJson(res, status, body) {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  // Behind Vercel the request arrives as /relay/webhook, /relay/health — strip
+  // the mount prefix so the same routes serve bare paths in local dev too.
+  const pathname = url.pathname.startsWith(`${MOUNT_PREFIX}/`)
+    ? url.pathname.slice(MOUNT_PREFIX.length)
+    : url.pathname;
 
-  if (req.method === 'GET' && url.pathname === '/health') {
+  if (req.method === 'GET' && pathname === '/health') {
     return sendJson(res, 200, {
       service: 'y10-lead-relay',
       runtime: `node ${process.version}`,
@@ -164,7 +193,7 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  if (req.method === 'POST' && url.pathname === '/webhook') {
+  if (req.method === 'POST' && pathname === '/webhook') {
     try {
       if (RELAY_SECRET) {
         const provided = req.headers['x-relay-secret'];

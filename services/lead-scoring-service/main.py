@@ -23,6 +23,13 @@ Endpoints:
 Run:
     pip install -r requirements.txt
     uvicorn main:app --host 0.0.0.0 --port 4060
+
+Deploy (Vercel):
+    Deployed as the "lead-scoring-service" service of the root vercel.json and
+    mounted under the public path prefix /scoring — so production requests
+    arrive as POST /scoring/score, POST /scoring/score/batch, GET /scoring/health.
+    The StripPrefixMiddleware below removes that prefix before routing, so the
+    same bare routes keep working in local development (uvicorn main:app).
 ===============================================================================
 """
 
@@ -30,12 +37,45 @@ from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from starlette.types import ASGIApp, Receive, Scope, Send
+
+# ---------------------------------------------------------------------------
+# Vercel mount-prefix handling
+# ---------------------------------------------------------------------------
+
+MOUNT_PREFIX = "/scoring"
+
+
+class StripPrefixMiddleware:
+    """ASGI middleware that removes Vercel's public mount prefix from the path.
+
+    Vercel routes /scoring/* to this service without rewriting the path, while
+    FastAPI routes are defined at /score, /score/batch and /health. Stripping
+    the prefix before routing keeps one set of routes for both environments.
+    """
+
+    def __init__(self, app: ASGIApp, prefix: str = MOUNT_PREFIX) -> None:
+        self.app = app
+        self.prefix = prefix
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] in {"http", "websocket"}:
+            path = scope.get("path", "")
+            if path == self.prefix:
+                path = "/"
+            elif path.startswith(self.prefix + "/"):
+                path = path[len(self.prefix):]
+            scope = {**scope, "path": path, "raw_path": path.encode()}
+        await self.app(scope, receive, send)
+
 
 app = FastAPI(
     title="Y10 Lead Scoring Service",
     description="FastAPI microservice that scores Young10 Marketing leads (0-100, HOT/WARM/COLD).",
     version="1.0.0",
 )
+
+app.add_middleware(StripPrefixMiddleware, prefix=MOUNT_PREFIX)
 
 # ---------------------------------------------------------------------------
 # Constants — scoring model
