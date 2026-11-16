@@ -10,13 +10,9 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  Facebook,
-  Instagram,
-  Linkedin,
   Loader2,
   Lock,
   Mail,
-  Phone,
   User,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -155,37 +151,6 @@ export default function AuthScreen() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[#EFF0F5]">
-      {/* Ink contact bar - identical to the site header chrome */}
-      <header className="ink-gradient flex h-11 shrink-0 items-center justify-between px-4 text-[12.5px] text-white/90 md:px-8">
-        <div className="flex items-center gap-6">
-          <a
-            href="mailto:alex@young10marketing.com"
-            className="flex items-center gap-2 transition-colors hover:text-white"
-          >
-            <Mail className="h-3.5 w-3.5 text-white/70" aria-hidden="true" />
-            <span className="hidden sm:inline">alex@young10marketing.com</span>
-            <span className="sm:hidden">Email</span>
-          </a>
-          <a href="tel:+12708444916" className="hidden items-center gap-2 transition-colors hover:text-white md:flex">
-            <Phone className="h-3.5 w-3.5 text-white/70" aria-hidden="true" />
-            +1 270-844-4916
-          </a>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="hidden text-white/70 sm:inline">Follow Us</span>
-          <div className="flex items-center gap-1.5">
-            {[Facebook, Instagram, Linkedin].map((Icon, i) => (
-              <span
-                key={i}
-                className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-primary text-white"
-              >
-                <Icon className="h-3 w-3" aria-hidden="true" />
-              </span>
-            ))}
-          </div>
-        </div>
-      </header>
-
       <main className="auth-wash relative flex-1 overflow-hidden">
         {/* Quiet geometry - thin arcs and dots, echoing the site hero */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
@@ -204,7 +169,7 @@ export default function AuthScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: 'easeOut' }}
           >
-            <Logo height={96} className="hidden lg:inline-flex" />
+            <Logo height={120} className="hidden lg:inline-flex" />
             <div className="mt-12 flex items-center gap-3 lg:mt-16">
               <span className="h-[3px] w-9 rounded-full bg-primary" aria-hidden="true" />
               <p className="text-[13px] font-bold uppercase tracking-[0.18em] text-primary">
@@ -232,7 +197,7 @@ export default function AuthScreen() {
             className="w-full max-w-[460px] justify-self-center"
           >
             <div className="card-float rounded-2xl border border-white/70 bg-white px-7 py-8 sm:px-9 sm:py-9">
-              <Logo height={56} className="lg:hidden" />
+              <Logo height={64} className="lg:hidden" />
 
               <motion.div
                 key={mode}

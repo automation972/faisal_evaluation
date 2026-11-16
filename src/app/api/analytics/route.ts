@@ -21,7 +21,12 @@ export async function GET() {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [totalLeads, openLeads, wonLeads, lostLeads, leadsThisMonth, stageGroups, sourceGroups, repGroups, wonAgg, taskCounts] =
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+    // One fully parallel wave — every query is independent, so the whole
+    // analytics payload costs ~1-2 network round trips instead of 8.
+    const [totalLeads, openLeads, wonLeads, lostLeads, leadsThisMonth, stageGroups, sourceGroups, repGroups, wonAgg, openPipelineAgg, weeklyRows, wonByRep, allUsers, taskCounts] =
       await Promise.all([
         db.lead.count({ where: leadScope }),
         db.lead.count({ where: { ...leadScope, status: 'OPEN', stage: { not: 'WON' } } }),
@@ -49,6 +54,37 @@ export async function GET() {
           where: { ...leadScope, stage: 'WON' },
           _sum: { value: true },
         }),
+        // Open pipeline value = value of all leads not yet won
+        db.lead.aggregate({
+          where: { ...leadScope, stage: { not: 'WON' }, status: 'OPEN' },
+          _sum: { value: true },
+        }),
+        // 8-week trend via raw SQL date_trunc (Neon PostgreSQL)
+        auth.role === 'ADMIN'
+          ? db.$queryRaw<Array<{ week_start: Date; count: bigint }>>(Prisma.sql`
+              SELECT date_trunc('week', "createdAt") AS week_start, COUNT(*)::bigint AS count
+              FROM "Lead"
+              WHERE "createdAt" >= NOW() - INTERVAL '8 weeks'
+              GROUP BY 1
+              ORDER BY 1 ASC
+            `)
+          : db.$queryRaw<Array<{ week_start: Date; count: bigint }>>(Prisma.sql`
+              SELECT date_trunc('week', "createdAt") AS week_start, COUNT(*)::bigint AS count
+              FROM "Lead"
+              WHERE "createdAt" >= NOW() - INTERVAL '8 weeks'
+                AND ("assignedToId" = ${auth.id} OR "createdById" = ${auth.id})
+              GROUP BY 1
+              ORDER BY 1 ASC
+            `),
+        // Merged groupBy — won count AND won value in one query (was two)
+        db.lead.groupBy({
+          by: ['assignedToId'],
+          where: { ...(auth.role === 'ADMIN' ? {} : leadScope), stage: 'WON', assignedToId: { not: null } },
+          _count: { _all: true },
+          _sum: { value: true },
+        }),
+        // Workspace members (small table) — rep details filtered in memory below
+        db.user.findMany({ where: { active: true }, select: { id: true, name: true, email: true } }),
         Promise.all([
           db.task.count({ where: taskScope }),
           db.task.count({ where: { ...taskScope, status: 'PENDING' } }),
@@ -56,6 +92,9 @@ export async function GET() {
           db.task.count({ where: { ...taskScope, status: 'COMPLETED' } }),
           db.task.count({
             where: { ...taskScope, status: { not: 'COMPLETED' }, dueDate: { lt: now } },
+          }),
+          db.task.count({
+            where: { ...taskScope, status: { not: 'COMPLETED' }, dueDate: { gte: dayStart, lt: dayEnd } },
           }),
         ]),
       ]);
@@ -68,31 +107,6 @@ export async function GET() {
         value: group?._sum.value ?? 0,
       };
     });
-
-    // Open pipeline value = value of all leads not yet won
-    const openPipelineAgg = await db.lead.aggregate({
-      where: { ...leadScope, stage: { not: 'WON' }, status: 'OPEN' },
-      _sum: { value: true },
-    });
-
-    // 8-week trend via raw SQL date_trunc (Neon PostgreSQL)
-    const weeklyRows =
-      auth.role === 'ADMIN'
-        ? await db.$queryRaw<Array<{ week_start: Date; count: bigint }>>(Prisma.sql`
-            SELECT date_trunc('week', "createdAt") AS week_start, COUNT(*)::bigint AS count
-            FROM "Lead"
-            WHERE "createdAt" >= NOW() - INTERVAL '8 weeks'
-            GROUP BY 1
-            ORDER BY 1 ASC
-          `)
-        : await db.$queryRaw<Array<{ week_start: Date; count: bigint }>>(Prisma.sql`
-            SELECT date_trunc('week', "createdAt") AS week_start, COUNT(*)::bigint AS count
-            FROM "Lead"
-            WHERE "createdAt" >= NOW() - INTERVAL '8 weeks'
-              AND ("assignedToId" = ${auth.id} OR "createdById" = ${auth.id})
-            GROUP BY 1
-            ORDER BY 1 ASC
-          `);
 
     // Fill 8 weekly buckets (UTC, Monday-start to match date_trunc) with counts
     const weeklyTrend: WeeklyPoint[] = [];
@@ -114,27 +128,13 @@ export async function GET() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Leaderboard details
+    // Leaderboard stats (details filtered from the in-memory workspace users)
     const repIds = repGroups.map((g) => g.assignedToId).filter((v): v is string => !!v);
-    const repUsers = repIds.length
-      ? await db.user.findMany({ where: { id: { in: repIds } }, select: { id: true, name: true, email: true } })
-      : [];
-    const wonCounts = await db.lead.groupBy({
-      by: ['assignedToId'],
-      where: { ...(auth.role === 'ADMIN' ? {} : leadScope), stage: 'WON', assignedToId: { not: null } },
-      _count: { _all: true },
-    });
-    const wonSums = await db.lead.groupBy({
-      by: ['assignedToId'],
-      where: { ...(auth.role === 'ADMIN' ? {} : leadScope), stage: 'WON', assignedToId: { not: null } },
-      _sum: { value: true },
-    });
-
+    const repUsers = allUsers.filter((u) => repIds.includes(u.id));
     const repLeaderboard: RepStat[] = repUsers
       .map((u) => {
         const g = repGroups.find((r) => r.assignedToId === u.id);
-        const won = wonCounts.find((r) => r.assignedToId === u.id);
-        const wonSum = wonSums.find((r) => r.assignedToId === u.id);
+        const won = wonByRep.find((r) => r.assignedToId === u.id);
         return {
           userId: u.id,
           name: u.name,
@@ -142,17 +142,10 @@ export async function GET() {
           totalLeads: g?._count._all ?? 0,
           wonLeads: won?._count._all ?? 0,
           openValue: g?._sum.value ?? 0,
-          wonValue: wonSum?._sum.value ?? 0,
+          wonValue: won?._sum.value ?? 0,
         };
       })
       .sort((a, b) => b.wonLeads - a.wonLeads || b.totalLeads - a.totalLeads);
-
-    // Due-today count fix (the Promise.all above used a placeholder; recompute properly)
-    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    const dueToday = await db.task.count({
-      where: { ...taskScope, status: { not: 'COMPLETED' }, dueDate: { gte: dayStart, lt: dayEnd } },
-    });
 
     const result: AnalyticsResult = {
       totals: {
@@ -175,7 +168,7 @@ export async function GET() {
         inProgress: taskCounts[2],
         completed: taskCounts[3],
         overdue: taskCounts[4],
-        dueToday,
+        dueToday: taskCounts[5],
       },
       generatedAt: now.toISOString(),
     };

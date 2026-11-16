@@ -77,8 +77,10 @@ export default function Page() {
       new QueryClient({
         defaultOptions: {
           queries: {
-            refetchOnWindowFocus: true,
-            staleTime: 10_000,
+            // Cached data stays fresh longer: view switches render instantly
+            // from cache instead of re-fetching on every navigation.
+            refetchOnWindowFocus: false,
+            staleTime: 20_000,
             retry: 1,
           },
         },
