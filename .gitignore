@@ -76,3 +76,7 @@ download/
 y10-full.html
 prompt
 test
+
+# python
+__pycache__/
+*.pyc
