@@ -2,13 +2,14 @@
 
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { motion } from 'framer-motion';
 import {
   Activity,
   ArrowRight,
   ArrowRightLeft,
+  ChevronDown,
   CalendarCheck,
   CheckCircle2,
   Globe,
@@ -337,12 +338,15 @@ function SourceTooltip({
 const LEADERBOARD_GRID =
   'grid grid-cols-[1.75rem_auto_minmax(0,1fr)_3.5rem_4rem_5.75rem] items-center gap-x-3';
 
+const ACTIVITY_PREVIEW_COUNT = 4;
+
 export default function DashboardView({ user }: { user: SafeUser }) {
   const { data: analytics, isLoading } = useAnalytics();
   const { data: activities } = useActivities(10);
   const { data: tasksData } = useTasks({ status: 'ALL', mine: user.role !== 'ADMIN' });
   const setView = useCrmStore((s) => s.setView);
   const openLeadDetail = useCrmStore((s) => s.openLeadDetail);
+  const [showAllActivity, setShowAllActivity] = useState(false);
 
   const weeklyData = (analytics?.weeklyTrend ?? []).map((point) => ({
     label: new Date(point.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -368,6 +372,12 @@ export default function DashboardView({ user }: { user: SafeUser }) {
     })
     .slice(0, 5);
   const leaderboard = [...(analytics?.repLeaderboard ?? [])].sort((a, b) => b.wonValue - a.wonValue);
+  const visibleActivities = activities
+    ? showAllActivity
+      ? activities
+      : activities.slice(0, ACTIVITY_PREVIEW_COUNT)
+    : [];
+  const hiddenActivityCount = activities ? Math.max(activities.length - ACTIVITY_PREVIEW_COUNT, 0) : 0;
 
   return (
     <div className="space-y-6">
@@ -543,7 +553,7 @@ export default function DashboardView({ user }: { user: SafeUser }) {
           </Section>
 
           {/* Row 3 - sources + follow-ups + activity */}
-          <Section className="grid gap-6 xl:grid-cols-3" delay={0.12}>
+          <Section className="grid items-start gap-6 xl:grid-cols-3" delay={0.12}>
             <Card className="card-shadow p-5 xl:p-6">
               <CardHead title="Lead sources" />
               <div className="h-56">
@@ -637,17 +647,36 @@ export default function DashboardView({ user }: { user: SafeUser }) {
                   <p className="mt-1 text-xs text-muted-foreground">Team actions will show up here in real time</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {activities.map((item) => {
-                    const leadId = item.lead?.id ?? null;
-                    return (
-                      <ActivityRow
-                        key={item.id}
-                        activity={item}
-                        onOpenLead={leadId ? () => openLeadDetail(leadId) : undefined}
+                <div>
+                  <div
+                    className={cn(
+                      'space-y-2',
+                      showAllActivity && 'scrollbar-slim max-h-72 overflow-y-auto pr-1',
+                    )}
+                  >
+                    {visibleActivities.map((item) => {
+                      const leadId = item.lead?.id ?? null;
+                      return (
+                        <ActivityRow
+                          key={item.id}
+                          activity={item}
+                          onOpenLead={leadId ? () => openLeadDetail(leadId) : undefined}
+                        />
+                      );
+                    })}
+                  </div>
+                  {activities.length > ACTIVITY_PREVIEW_COUNT ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllActivity((prev) => !prev)}
+                      className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/30 hover:bg-[#F7F8FC] hover:text-primary"
+                    >
+                      {showAllActivity ? 'Show less' : `View more (${hiddenActivityCount})`}
+                      <ChevronDown
+                        className={cn('h-3.5 w-3.5 transition-transform', showAllActivity && 'rotate-180')}
                       />
-                    );
-                  })}
+                    </button>
+                  ) : null}
                 </div>
               )}
             </Card>
