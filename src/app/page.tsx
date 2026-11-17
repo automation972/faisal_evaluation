@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMe } from '@/hooks/use-crm';
 import AuthScreen from '@/components/auth/auth-screen';
-import AuraPage from '@/components/landing/aura/aura-page';
+import LandingPage from '@/components/landing/landing-page';
 import { DesktopSidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
 import DashboardView from '@/components/dashboard/dashboard-view';
@@ -42,7 +42,7 @@ function CrmWorkspace() {
     return showAuth ? (
       <AuthScreen onBack={() => setShowAuth(false)} />
     ) : (
-      <AuraPage onOpenCrm={() => setShowAuth(true)} />
+      <LandingPage onOpenCrm={() => setShowAuth(true)} />
     );
   }
 
