@@ -1,10 +1,13 @@
-// Young10 Marketing — landing page sections (dark cinematic theme)
+// Young10 Marketing — landing page sections (light theme, matches young10marketing.com)
+// White surfaces, brand blue #384BFE accents, ink #0F0D1D text.
 // All copy, awards, and contact details come from young10marketing.com.
 
 'use client';
 
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import {
+  Award,
   ChevronRight,
   Facebook,
   Instagram,
@@ -18,15 +21,92 @@ import {
   Target,
   type LucideIcon,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
+
+/* ---------------------------------------------------------------------------
+   Rise — resilient scroll-reveal wrapper.
+
+   Uses its own IntersectionObserver plus a scroll-past safety net: if a
+   fast jump (anchor link, End key) skips the element across the viewport
+   in a single frame, it is revealed anyway. Content can never stay stuck
+   at opacity 0, which can happen with `whileInView` + `once: true`.
+   -------------------------------------------------------------------------- */
+
+export function Rise({
+  children,
+  delay = 0,
+  distance = 24,
+  className,
+  as = 'div',
+}: {
+  children: ReactNode;
+  delay?: number;
+  distance?: number;
+  className?: string;
+  as?: 'div' | 'figure';
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const doneRef = useRef(false);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const reveal = () => {
+      if (doneRef.current) return;
+      doneRef.current = true;
+      setShown(true);
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            reveal();
+            io.disconnect();
+          }
+        }
+      },
+      { rootMargin: '0px 0px -60px 0px', threshold: 0.05 },
+    );
+    io.observe(el);
+
+    // Safety net: anything entirely above the viewport was scrolled past.
+    const onScroll = () => {
+      if (doneRef.current) return;
+      if (el.getBoundingClientRect().bottom < 0) reveal();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      io.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
+  const MotionTag = as === 'figure' ? motion.figure : motion.div;
+
+  return (
+    <MotionTag
+      ref={ref}
+      className={className}
+      initial={false}
+      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y: distance }}
+      transition={{ duration: 0.65, delay: shown ? delay : 0, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </MotionTag>
+  );
+}
 
 /* ---------------------------------------------------------------------------
    Primitives
    -------------------------------------------------------------------------- */
 
-/** Abstract pinwheel brand symbol (white, for dark surfaces). */
+/** Abstract pinwheel brand symbol (ink, for light surfaces). */
 export function Y10Mark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={cn('h-4 w-4', className)}>
@@ -38,7 +118,7 @@ export function Y10Mark({ className }: { className?: string }) {
   );
 }
 
-/** White pill button — the primary action across the landing. */
+/** Brand-blue pill button — the primary action across the landing. */
 export function Y10Button({
   label,
   href,
@@ -59,7 +139,7 @@ export function Y10Button({
     </>
   );
   const classes = cn(
-    'group inline-flex items-center justify-center gap-2 rounded-full bg-white text-black font-medium text-sm px-5 py-3 transition-all hover:bg-white/90 active:scale-[0.98]',
+    'group inline-flex items-center justify-center gap-2 rounded-full bg-[#384BFE] text-white font-medium text-sm px-5 py-3 shadow-[0_10px_24px_-10px_rgba(56,75,254,0.65)] transition-all hover:bg-[#2b3ad1] hover:shadow-[0_14px_30px_-10px_rgba(56,75,254,0.7)] active:scale-[0.98]',
     full && 'w-full',
     className,
   );
@@ -77,24 +157,20 @@ export function Y10Button({
   );
 }
 
-/** Small uppercase section label with dot + optional tag pill. */
+/** Small uppercase section label with brand-blue dot + optional tag pill. */
 export function SectionEyebrow({ label, tag }: { label: string; tag?: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true" />
-      <span className="text-sm font-medium text-white">{label}</span>
+      <span className="h-1.5 w-1.5 rounded-full bg-[#384BFE]" aria-hidden="true" />
+      <span className="text-sm font-semibold uppercase tracking-[0.14em] text-[#384BFE]">{label}</span>
       {tag ? (
-        <span className="rounded-full border border-white/10 px-2 py-0.5 text-xs text-white/50">{tag}</span>
+        <span className="rounded-full border border-[#0F0D1D]/10 bg-white px-2.5 py-0.5 text-xs font-medium text-[#5f6274]">
+          {tag}
+        </span>
       ) : null}
     </div>
   );
 }
-
-const riseIn = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-80px' },
-} as const;
 
 /* ---------------------------------------------------------------------------
    Section — Strategic growth (site copy: "We Empower Business Growth Through
@@ -102,24 +178,22 @@ const riseIn = {
    -------------------------------------------------------------------------- */
 
 const SNAPSHOT = [
-  { label: 'Organic', count: 38, tone: '#ffffff', items: ['Keywords ranking on page one'] },
-  { label: 'Paid ROAS', count: 4.2, suffix: 'x', tone: '#e5e5e5', items: ['Ad spend optimized weekly'] },
-  { label: 'Leads captured', count: 126, tone: '#a3a3a3', items: ['Web forms · API · Landing pages'] },
-  { label: 'Retention', count: 96, suffix: '%', tone: '#525252', items: ['Quarterly strategy reviews'] },
+  { label: 'Keywords on page one', value: '38', dot: '#384BFE', note: 'Organic search rankings' },
+  { label: 'Paid ROAS', value: '4.2x', dot: '#0ea5b7', note: 'Ad spend optimized weekly' },
+  { label: 'Leads captured', value: '126', dot: '#16a34a', note: 'Web forms · API · Landing pages' },
+  { label: 'Client retention', value: '96%', dot: '#f59e0b', note: 'Quarterly strategy reviews' },
 ];
 
 export function GrowthSection() {
   return (
     <section id="growth" className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-      <div className="grid items-start gap-10 md:grid-cols-2 md:gap-16">
-        <motion.div {...riseIn} transition={{ duration: 0.7, ease: 'easeOut' }}>
+      <div className="grid items-start gap-10 md:grid-cols-2 md:gap-14">
+        <Rise>
           <SectionEyebrow label="SEO" tag="Data-driven" />
-          <h2 className="mt-5 text-3xl font-semibold leading-[1.02] tracking-tight md:text-5xl">
-            We empower business growth
-            <br />
-            through strategic SEO.
+          <h2 className="mt-5 text-3xl font-semibold leading-[1.12] tracking-tight text-[#0F0D1D] md:text-4xl lg:text-[2.75rem]">
+            We empower business growth through strategic SEO.
           </h2>
-          <p className="mt-6 max-w-md text-base leading-[1.6] text-white/60">
+          <p className="mt-6 max-w-md text-base leading-[1.7] text-[#5f6274]">
             Businesses thrive when their content and design effectively complement each other. Young10
             Marketing helps businesses in Sheridan, Wyoming develop well-structured pages that keep people
             engaged, integrating e-commerce marketing services to enhance overall performance — and we
@@ -130,45 +204,43 @@ export function GrowthSection() {
               (chip) => (
                 <span
                   key={chip}
-                  className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-white/70"
+                  className="rounded-full border border-[#0F0D1D]/10 bg-white px-3.5 py-1.5 text-xs font-medium text-[#0F0D1D]/70 shadow-[0_1px_2px_rgba(16,18,35,0.05)]"
                 >
                   {chip}
                 </span>
               ),
             )}
           </div>
-        </motion.div>
+        </Rise>
 
-        <motion.div
-          {...riseIn}
-          transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
-          className="liquid-glass rounded-2xl p-5"
-        >
-          <p className="px-1 pb-4 text-xs uppercase tracking-widest text-white/50">
-            This month · Growth snapshot
-          </p>
+        <Rise delay={0.12} className="rounded-2xl border border-[#0F0D1D]/[0.07] bg-white p-6 card-shadow">
+          <div className="flex items-center justify-between px-1 pb-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5f6274]">
+              This month · Growth snapshot
+            </p>
+            <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#16a34a] opacity-60" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#16a34a]" />
+            </span>
+          </div>
           <div className="space-y-3">
             {SNAPSHOT.map((row) => (
-              <div key={row.label} className="liquid-glass rounded-lg p-3">
-                <div className="flex items-center justify-between px-1">
-                  <span className="flex items-center gap-2 text-sm font-medium" style={{ color: row.tone }}>
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: row.tone }} aria-hidden="true" />
-                    {row.label}
+              <div
+                key={row.label}
+                className="flex items-center justify-between gap-4 rounded-xl bg-[#F5F6FB] px-4 py-3.5 transition-colors hover:bg-[#EEF0FA]"
+              >
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: row.dot }} aria-hidden="true" />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-[#0F0D1D]">{row.label}</span>
+                    <span className="block truncate text-xs text-[#7A7A7A]">{row.note}</span>
                   </span>
-                  <span className="text-sm font-semibold text-white">
-                    {row.count}
-                    {'suffix' in row ? row.suffix : ''}
-                  </span>
-                </div>
-                {row.items.map((item) => (
-                  <p key={item} className="mt-1.5 px-1 text-xs text-white/45">
-                    {item}
-                  </p>
-                ))}
+                </span>
+                <span className="shrink-0 text-lg font-semibold tracking-tight text-[#0F0D1D]">{row.value}</span>
               </div>
             ))}
           </div>
-        </motion.div>
+        </Rise>
       </div>
     </section>
   );
@@ -189,28 +261,28 @@ const AWARDS = [
 export function AwardsSection() {
   return (
     <section id="awards" className="mx-auto max-w-6xl px-6 py-16 md:py-20">
-      <motion.p
-        {...riseIn}
-        transition={{ duration: 0.6 }}
-        className="text-center text-xs uppercase tracking-widest text-white/40"
-      >
-        Achievements &amp; Awards
-      </motion.p>
-      <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
+      <Rise className="flex flex-col items-center text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7A7A7A]">
+          Achievements &amp; Awards
+        </p>
+        <h3 className="mt-3 text-2xl font-semibold tracking-tight text-[#0F0D1D] md:text-3xl">
+          Recognized by the industry.
+        </h3>
+      </Rise>
+      <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {AWARDS.map((badge, i) => (
-          <motion.div
+          <Rise
             key={`${badge.platform}-${badge.award}`}
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.05, ease: 'easeOut' }}
-            className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-5 text-center transition-colors hover:border-white/15"
+            delay={i * 0.06}
+            distance={16}
+            className="group flex flex-col items-center rounded-2xl border border-[#0F0D1D]/[0.07] bg-white px-4 py-6 text-center transition-all duration-300 hover:-translate-y-1 hover:border-[#384BFE]/35 hover:shadow-[0_18px_40px_-20px_rgba(31,34,78,0.25)]"
           >
-            <p className="text-sm font-semibold tracking-tight text-white/50 transition-colors hover:text-white">
-              {badge.platform}
-            </p>
-            <p className="mt-2 text-xs leading-snug text-white/40">{badge.award}</p>
-          </motion.div>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#384BFE]/10 text-[#384BFE] transition-transform duration-300 group-hover:scale-110">
+              <Award className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <p className="mt-3.5 text-sm font-semibold tracking-tight text-[#0F0D1D]">{badge.platform}</p>
+            <p className="mt-1.5 text-xs leading-snug text-[#7A7A7A]">{badge.award}</p>
+          </Rise>
         ))}
       </div>
     </section>
@@ -256,32 +328,36 @@ const SERVICES: { icon: LucideIcon; name: string; desc: string }[] = [
 
 export function ServicesSection() {
   return (
-    <section id="services" className="mx-auto max-w-6xl px-6 py-20 md:py-28">
-      <motion.div {...riseIn} transition={{ duration: 0.6 }} className="flex flex-col items-center text-center">
+    <section id="services" className="relative mx-auto max-w-6xl px-6 py-20 md:py-28">
+      {/* Dotted texture band behind the header (decor) */}
+      <div
+        aria-hidden="true"
+        className="y10-dots pointer-events-none absolute inset-x-6 top-10 -z-10 h-40 opacity-40 [mask-image:radial-gradient(60%_100%_at_50%_0%,black,transparent)]"
+      />
+      <Rise className="flex flex-col items-center text-center">
         <SectionEyebrow label="Our Services" />
-        <h2 className="mt-5 text-3xl font-semibold tracking-tight md:text-5xl">
+        <h2 className="mt-5 text-3xl font-semibold tracking-tight text-[#0F0D1D] md:text-5xl">
           Everything your growth needs.
           <br />
-          <span className="text-white/50">Nothing it doesn't.</span>
+          <span className="text-[#7A7A7A]">Nothing it doesn&apos;t.</span>
         </h2>
-      </motion.div>
+      </Rise>
 
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {SERVICES.map((service, i) => (
-          <motion.figure
+          <Rise
             key={service.name}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.55, delay: (i % 3) * 0.08, ease: 'easeOut' }}
-            className="liquid-glass rounded-2xl p-6 transition-transform duration-300 hover:-translate-y-1"
+            as="figure"
+            delay={(i % 3) * 0.08}
+            distance={20}
+            className="card-lift group rounded-2xl border border-[#0F0D1D]/[0.07] bg-white p-6 card-shadow"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/5">
-              <service.icon className="h-5 w-5 text-white/80" aria-hidden="true" />
+            <div className="stat-icon stat-icon-blue flex h-11 w-11 items-center justify-center rounded-xl bg-[#384BFE]/10 text-[#384BFE]">
+              <service.icon className="h-5 w-5" aria-hidden="true" />
             </div>
-            <figcaption className="mt-5 text-base font-semibold text-white">{service.name}</figcaption>
-            <p className="mt-2.5 text-sm leading-[1.6] text-white/55">{service.desc}</p>
-          </motion.figure>
+            <figcaption className="mt-5 text-base font-semibold text-[#0F0D1D]">{service.name}</figcaption>
+            <p className="mt-2.5 text-sm leading-[1.65] text-[#7A7A7A]">{service.desc}</p>
+          </Rise>
         ))}
       </div>
     </section>
@@ -289,60 +365,94 @@ export function ServicesSection() {
 }
 
 /* ---------------------------------------------------------------------------
-   Section — Final CTA
+   Section — Final CTA (brand-blue gradient panel)
    -------------------------------------------------------------------------- */
 
 export function FinalCta() {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-20 md:py-32">
-      <motion.div
-        {...riseIn}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
-        className="liquid-glass relative overflow-hidden rounded-3xl px-8 py-16 text-center md:py-24"
+    <section className="mx-auto max-w-6xl px-6 py-20 md:py-28">
+      <Rise
+        delay={0.05}
+        distance={32}
+        className="brand-gradient relative overflow-hidden rounded-[2rem] px-8 py-16 text-center shadow-[0_32px_80px_-32px_rgba(43,58,209,0.55)] md:py-20"
       >
+        {/* Decorative floating orbs */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-30"
-          style={{ background: 'radial-gradient(600px circle at 50% 0%, rgba(255,255,255,0.15), transparent 70%)' }}
+          className="animate-float-slow pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
+        />
+        <div
+          aria-hidden="true"
+          className="animate-float-slow pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-[#0F0D1D]/25 blur-3xl [animation-delay:-3.5s]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-40"
+          style={{ background: 'radial-gradient(640px circle at 50% -10%, rgba(255,255,255,0.28), transparent 70%)' }}
         />
         <div className="relative">
-          <h2 className="text-4xl font-semibold leading-[1.02] tracking-tight md:text-6xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/90">
+            <span className="h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true" />
+            Let&apos;s work together
+          </span>
+          <h2 className="mt-6 text-4xl font-semibold leading-[1.05] tracking-tight text-white md:text-6xl">
             Your growth.
             <br />
             Our mission.
           </h2>
-          <p className="mx-auto mt-6 max-w-md text-sm leading-[1.6] text-white/60">
+          <p className="mx-auto mt-6 max-w-md text-sm leading-[1.7] text-white/80 md:text-base">
             Strategy, execution, and a platform that keeps every opportunity moving — from first click to
             closed deal.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Y10Button label="Contact Us" href="mailto:alex@young10marketing.com" />
+            <a
+              href="mailto:alex@young10marketing.com"
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#0F0D1D] shadow-[0_14px_30px_-12px_rgba(15,13,29,0.5)] transition-all hover:bg-white/95 active:scale-[0.98]"
+            >
+              Contact Us
+              <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-[1px]" aria-hidden="true" />
+            </a>
             <a
               href="tel:+12708444916"
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
             >
               Call +1 270-844-4916
-              <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </a>
           </div>
         </div>
-      </motion.div>
+      </Rise>
     </section>
   );
 }
 
 /* ---------------------------------------------------------------------------
-   Footer — real company contact details
+   Footer — deep ink footer with real company contact details
    -------------------------------------------------------------------------- */
 
-function SocialLink({ href, label, children }: { href: string; label: string; children: ReactNode }) {
+const FOOTER_SERVICES = [
+  'Search Engine Optimization',
+  'Content Marketing',
+  'Social Media Marketing',
+  'E-commerce Marketing',
+  'Email & Retention',
+  'Strategy & Consulting',
+] as const;
+
+const FOOTER_COMPANY = [
+  { label: 'Growth', href: '#growth' },
+  { label: 'Services', href: '#services' },
+  { label: 'Awards', href: '#awards' },
+  { label: 'young10marketing.com', href: 'https://young10marketing.com/' },
+] as const;
+
+function FooterSocialLink({ href, label, children }: { href: string; label: string; children: ReactNode }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer noopener"
       aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white/70 transition-all hover:-translate-y-0.5 hover:border-[#384BFE] hover:bg-[#384BFE] hover:text-white"
     >
       {children}
     </a>
@@ -351,68 +461,111 @@ function SocialLink({ href, label, children }: { href: string; label: string; ch
 
 export function LandingFooter() {
   return (
-    <footer className="mt-auto border-t border-white/10 bg-black/40">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-12 md:flex-row md:items-start md:justify-between">
-        <div className="max-w-sm">
-          <img
-            src="/brand/logo-white.png"
-            alt="Young10 Marketing"
-            className="h-9 w-auto"
-            width={110}
-            height={36}
-          />
-          <p className="mt-4 text-sm leading-[1.6] text-white/50">
-            Professional digital marketing agency in Sheridan, Wyoming — fueling growth and driving
-            results.
-          </p>
-        </div>
+    <footer className="relative mt-auto overflow-hidden bg-[#0F0D1D] text-white">
+      {/* Decor: brand pinwheel watermark + soft blue glow */}
+      <Y10Mark className="pointer-events-none absolute -right-16 top-10 h-72 w-72 rotate-12 text-white/[0.04]" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[#384BFE]/20 blur-[120px]"
+      />
 
-        <div className="space-y-3 text-sm text-white/60">
-          <p className="text-xs uppercase tracking-widest text-white/40">Contact</p>
-          <a
-            href="mailto:alex@young10marketing.com"
-            className="flex items-center gap-2.5 transition-colors hover:text-white"
-          >
-            <Mail className="h-4 w-4 text-white/50" aria-hidden="true" />
-            alex@young10marketing.com
-          </a>
-          <a href="tel:+12708444916" className="flex items-center gap-2.5 transition-colors hover:text-white">
-            <Phone className="h-4 w-4 text-white/50" aria-hidden="true" />
-            +1 270-844-4916
-          </a>
-          <p className="flex items-center gap-2.5">
-            <MapPin className="h-4 w-4 text-white/50" aria-hidden="true" />
-            Sheridan, Wyoming
-          </p>
-        </div>
+      <div className="relative mx-auto max-w-6xl px-6 pb-10 pt-16 md:pt-20">
+        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1.2fr] md:gap-8">
+          {/* Brand column */}
+          <div className="max-w-sm">
+            <a href="#" className="inline-flex items-center" aria-label="Young10 Marketing home">
+              <img
+                src="/brand/logo-white.png"
+                alt="Young10 Marketing"
+                className="h-11 w-auto"
+                width={124}
+                height={44}
+              />
+            </a>
+            <p className="mt-5 text-sm leading-[1.7] text-white/55">
+              Professional digital marketing agency in Sheridan, Wyoming — fueling growth, driving results,
+              and keeping every opportunity moving with the Y10 CRM platform.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <FooterSocialLink href="https://www.facebook.com/young10marketing" label="Young10 Marketing on Facebook">
+                <Facebook className="h-4 w-4" aria-hidden="true" />
+              </FooterSocialLink>
+              <FooterSocialLink href="https://www.instagram.com/young10marketing" label="Young10 Marketing on Instagram">
+                <Instagram className="h-4 w-4" aria-hidden="true" />
+              </FooterSocialLink>
+              <FooterSocialLink href="https://www.linkedin.com/company/young10-marketing" label="Young10 Marketing on LinkedIn">
+                <Linkedin className="h-4 w-4" aria-hidden="true" />
+              </FooterSocialLink>
+            </div>
+          </div>
 
-        <div>
-          <p className="text-xs uppercase tracking-widest text-white/40">Follow Us</p>
-          <div className="mt-4 flex gap-3">
-            <SocialLink href="https://www.facebook.com/young10marketing" label="Young10 Marketing on Facebook">
-              <Facebook className="h-4 w-4" aria-hidden="true" />
-            </SocialLink>
-            <SocialLink href="https://www.instagram.com/young10marketing" label="Young10 Marketing on Instagram">
-              <Instagram className="h-4 w-4" aria-hidden="true" />
-            </SocialLink>
-            <SocialLink href="https://www.linkedin.com/company/young10-marketing" label="Young10 Marketing on LinkedIn">
-              <Linkedin className="h-4 w-4" aria-hidden="true" />
-            </SocialLink>
+          {/* Company links */}
+          <nav aria-label="Company">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">Company</p>
+            <ul className="mt-5 space-y-3">
+              {FOOTER_COMPANY.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    {...(link.href.startsWith('http') ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
+                    className="group inline-flex items-center gap-1.5 text-sm text-white/65 transition-colors hover:text-white"
+                  >
+                    <span className="h-px w-0 bg-[#384BFE] transition-all duration-300 group-hover:w-3" aria-hidden="true" />
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Services list */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">Services</p>
+            <ul className="mt-5 space-y-3">
+              {FOOTER_SERVICES.map((service) => (
+                <li key={service} className="text-sm text-white/65">
+                  {service}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">Get in touch</p>
+            <div className="mt-5 space-y-3.5 text-sm">
+              <a
+                href="mailto:alex@young10marketing.com"
+                className="flex items-start gap-3 text-white/65 transition-colors hover:text-white"
+              >
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-white/70">
+                  <Mail className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 break-all pt-1.5">alex@young10marketing.com</span>
+              </a>
+              <a href="tel:+12708444916" className="flex items-start gap-3 text-white/65 transition-colors hover:text-white">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-white/70">
+                  <Phone className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span className="pt-1.5">+1 270-844-4916</span>
+              </a>
+              <p className="flex items-start gap-3 text-white/65">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-white/70">
+                  <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                <span className="pt-1.5">Sheridan, Wyoming</span>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="border-t border-white/5">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-5 text-xs text-white/40 sm:flex-row">
+        {/* Bottom bar */}
+        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-7 text-xs text-white/40 sm:flex-row">
           <p>© {new Date().getFullYear()} Young10 Marketing. All rights reserved.</p>
-          <a
-            href="https://young10marketing.com/"
-            target="_blank"
-            rel="noreferrer noopener"
-            className="transition-colors hover:text-white"
-          >
-            young10marketing.com
-          </a>
+          <p className="flex items-center gap-2">
+            <Y10Mark className="h-3 w-3 text-white/40" />
+            Young10 Marketing — Sheridan, WY
+          </p>
         </div>
       </div>
     </footer>
