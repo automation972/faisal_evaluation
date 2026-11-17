@@ -7,6 +7,7 @@
 import { useState, type FormEvent } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import {
+  ArrowLeft,
   ArrowRight,
   Eye,
   EyeOff,
@@ -69,7 +70,7 @@ function collectFieldErrors(error: z.ZodError): FieldErrors {
   return next;
 }
 
-export default function AuthScreen() {
+export default function AuthScreen({ onBack }: { onBack?: () => void }) {
   const login = useLogin();
   const register = useRegister();
 
@@ -150,7 +151,17 @@ export default function AuthScreen() {
   const passwordToggleLabel = showPassword ? 'Hide password' : 'Show password';
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#EFF0F5]">
+    <div className="relative flex min-h-screen flex-col bg-[#EFF0F5]">
+      {onBack ? (
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute left-5 top-5 z-20 inline-flex items-center gap-2 rounded-full border border-[#0F0D1D]/10 bg-white/70 px-3.5 py-1.5 text-xs font-medium text-[#0F0D1D]/60 backdrop-blur transition-colors hover:text-[#0F0D1D] md:left-8 md:top-8"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          Back to site
+        </button>
+      ) : null}
       <main className="auth-wash relative flex-1 overflow-hidden">
         {/* Quiet geometry - thin arcs and dots, echoing the site hero */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
