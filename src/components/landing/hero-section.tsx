@@ -74,7 +74,7 @@ export function HeroSection({ onOpenCrm }: { onOpenCrm: () => void }) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.25, ease: EASE }}
         >
-          <span className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.08] py-1.5 pl-3 pr-4 text-[12px] font-medium tracking-wide text-white/80 backdrop-blur-xl">
+          <span className="inline-flex items-center gap-2.5 rounded-full border border-white/14 bg-[#0B0D1F]/45 py-1.5 pl-3 pr-4 text-[12px] font-medium tracking-[0.02em] text-white/85 shadow-[0_8px_24px_-12px_rgba(4,6,16,0.8)] backdrop-blur-xl">
             <span className="relative flex size-2" aria-hidden>
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#8FA0FF] opacity-70" />
               <span className="relative inline-flex size-2 rounded-full bg-[#8FA0FF]" />
@@ -83,10 +83,10 @@ export function HeroSection({ onOpenCrm }: { onOpenCrm: () => void }) {
           </span>
         </motion.div>
 
-        {/* headline */}
+        {/* headline — soft shadow keeps type crisp over bright city lights */}
         <h1
           id="hero-heading"
-          className="mt-7 text-[clamp(2.7rem,6.4vw,4.9rem)] font-medium leading-[1.05] tracking-[-0.032em]"
+          className="mt-7 text-[clamp(2.7rem,6.4vw,4.9rem)] font-medium leading-[1.05] tracking-[-0.032em] [text-shadow:0_2px_24px_rgba(4,6,16,0.55)]"
         >
           {revealLine(
             0.4,
@@ -118,7 +118,7 @@ export function HeroSection({ onOpenCrm }: { onOpenCrm: () => void }) {
           initial={reduced ? undefined : { opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.95, ease: EASE }}
-          className="mt-6 max-w-[540px] text-[15.5px] leading-relaxed text-white/65 sm:text-[16.5px]"
+          className="mt-6 max-w-[560px] text-[15.5px] leading-relaxed text-white/70 [text-shadow:0_1px_14px_rgba(4,6,16,0.5)] sm:text-[16.5px]"
         >
           Contacts, pipeline, follow-ups and live reports — one beautifully
           organised workspace that keeps every deal moving forward.
