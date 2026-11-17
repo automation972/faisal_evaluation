@@ -48,8 +48,13 @@ export function LandingFooter() {
             <a href="#top" aria-label="Young10 Marketing — back to top" className="group w-fit">
               <Logo
                 variant="white"
-                height={64}
-                className="transition-transform duration-300 group-hover:scale-[1.03]"
+                height={72}
+                className="transition-transform duration-300 group-hover:scale-[1.02] md:hidden"
+              />
+              <Logo
+                variant="white"
+                height={104}
+                className="hidden transition-transform duration-300 group-hover:scale-[1.02] md:inline-block"
               />
             </a>
             <p className="mt-5 max-w-[300px] text-[13.5px] leading-relaxed text-white/50">

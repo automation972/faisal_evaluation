@@ -12,18 +12,22 @@ export function CountUp({
   to,
   duration = 1.5,
   delay = 0.15,
+  format,
   className,
 }: {
   to: number;
   duration?: number;
   delay?: number;
+  format?: (v: number) => string;
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: '-60px' });
   const reduced = useReducedMotion() ?? false;
   const motionValue = useMotionValue(0);
-  const rounded = useTransform(motionValue, (v) => `${Math.round(v)}`);
+  const rounded = useTransform(motionValue, (v) =>
+    format ? format(v) : `${Math.round(v)}`,
+  );
 
   useEffect(() => {
     if (!inView) return;

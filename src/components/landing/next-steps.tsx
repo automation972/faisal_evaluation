@@ -82,12 +82,16 @@ export function NextStepsSection() {
                   aria-hidden
                 />
 
-                {/* ghost numeral */}
-                <p
+                {/* ghost numeral — blur-rise entrance */}
+                <motion.p
+                  initial={reduced ? undefined : { opacity: 0, y: 22, filter: 'blur(10px)' }}
+                  whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.85, delay: 0.25 + i * 0.15, ease: EASE }}
                   className="mt-5 bg-gradient-to-b from-[#384BFE]/16 to-[#384BFE]/[0.04] bg-clip-text text-[52px] font-semibold leading-none tracking-tight text-transparent transition-all duration-300 group-hover:from-[#384BFE]/30 sm:text-[56px]"
                 >
                   {step.n}
-                </p>
+                </motion.p>
                 <p className="mt-3 text-[17px] font-semibold tracking-tight text-[#10111A]">
                   {step.title}
                 </p>
@@ -211,7 +215,13 @@ export function NextStepsSection() {
                   <span className="ml-2 text-[10px] text-white/30">9 deals · 3 stages</span>
                 </p>
                 <p className="text-[15px] font-semibold tabular-nums text-white">
-                  $26,500
+                  $
+                  <CountUp
+                    to={26500}
+                    duration={1.8}
+                    delay={0.6}
+                    format={(v) => Math.round(v).toLocaleString('en-US')}
+                  />
                 </p>
               </div>
 

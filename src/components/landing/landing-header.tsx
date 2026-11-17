@@ -52,10 +52,10 @@ export function LandingHeader({ onOpenCrm }: { onOpenCrm: () => void }) {
 
       <div
         className={`mx-auto flex w-full max-w-[1280px] items-center justify-between gap-6 px-5 transition-all duration-500 sm:px-8 ${
-          scrolled ? 'h-[64px]' : 'h-[80px]'
+          scrolled ? 'h-[80px] md:h-[84px]' : 'h-[72px] md:h-[104px]'
         }`}
       >
-        {/* brand */}
+        {/* brand — statement-size wordmark */}
         <a
           href="#top"
           aria-label="Young10 Marketing — home"
@@ -64,12 +64,17 @@ export function LandingHeader({ onOpenCrm }: { onOpenCrm: () => void }) {
           <span className="relative inline-flex items-center">
             <span
               aria-hidden
-              className="pointer-events-none absolute -inset-3 rounded-full bg-[#384BFE]/30 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100"
+              className="pointer-events-none absolute -inset-4 rounded-full bg-[#384BFE]/30 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100"
             />
             <Logo
               variant="white"
-              height={scrolled ? 40 : 46}
-              className="relative transition-[transform,height] duration-500 group-hover:scale-[1.03]"
+              height={scrolled ? 48 : 52}
+              className="relative transition-[transform,height] duration-500 group-hover:scale-[1.02] md:hidden"
+            />
+            <Logo
+              variant="white"
+              height={scrolled ? 64 : 84}
+              className="relative hidden transition-[transform,height] duration-500 group-hover:scale-[1.02] md:inline-block"
             />
           </span>
         </a>
@@ -123,7 +128,7 @@ export function LandingHeader({ onOpenCrm }: { onOpenCrm: () => void }) {
                   'radial-gradient(60% 120% at 50% -20%, rgba(143,160,255,0.5), transparent 70%)',
               }}
             />
-            <span className="relative">Get started</span>
+            <span className="relative whitespace-nowrap">Get started</span>
             <span className="relative grid size-5 place-items-center rounded-full bg-white/15 transition-transform duration-200 group-hover:translate-x-0.5">
               <ArrowRight className="size-3" aria-hidden />
             </span>

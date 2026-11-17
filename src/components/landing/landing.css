@@ -53,6 +53,22 @@
   }
 }
 
+/* gentle "living" float for product mini-panels -------------------------------- */
+
+.y10-float {
+  animation: y10-float 7s ease-in-out infinite;
+}
+
+@keyframes y10-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 /* Scroll cue ------------------------------------------------------------------ */
 
 .y10-scroll-dot {
