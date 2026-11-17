@@ -9,9 +9,9 @@ import { useFrame } from '@react-three/fiber';
 import { Environment, Lightformer } from '@react-three/drei';
 import * as THREE from 'three';
 
-export const LANDING_VIOLET = '#7563F4';
+export const LANDING_BLUE = '#384BFE';
 
-/** Procedural studio environment: big white softboxes + lavender fill + dark contrast strip. */
+/** Procedural studio environment: big white softboxes + pale blue fill + dark contrast strip. */
 export function StudioEnvironment({ resolution = 256 }: { resolution?: number }) {
   return (
     <Environment resolution={resolution} frames={1}>
@@ -20,10 +20,10 @@ export function StudioEnvironment({ resolution = 256 }: { resolution?: number })
       <Lightformer form="rect" intensity={2.6} color="#ffffff" position={[-6, 7, 5]} scale={[7, 10, 1]} target={[0, 0, 0]} />
       {/* Front fill — broad white panel */}
       <Lightformer form="rect" intensity={1.1} color="#f2f3ff" position={[0, 3.5, 8]} scale={[12, 5, 1]} target={[0, 1, 0]} />
-      {/* Lavender fill from the right */}
-      <Lightformer form="rect" intensity={0.85} color="#DCDDF5" position={[7, 3, -2]} scale={[5, 8, 1]} target={[0, 0, 0]} />
+      {/* Pale blue fill from the right */}
+      <Lightformer form="rect" intensity={0.85} color="#D8DDF8" position={[7, 3, -2]} scale={[5, 8, 1]} target={[0, 0, 0]} />
       {/* Cool accent strip behind */}
-      <Lightformer form="rect" intensity={0.7} color="#c9c4ff" position={[3, 5, -6]} scale={[8, 4, 1]} target={[0, 0, 0]} />
+      <Lightformer form="rect" intensity={0.7} color="#c9d2ff" position={[3, 5, -6]} scale={[8, 4, 1]} target={[0, 0, 0]} />
       {/* Dark contrast strip low-front (gives glass its dark reflections) */}
       <Lightformer form="rect" intensity={0.55} color="#191a2a" position={[0, -3, 5]} scale={[10, 3, 1]} target={[0, 0, 0]} />
       {/* Small ring highlight */}

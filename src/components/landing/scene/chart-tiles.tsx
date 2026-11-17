@@ -33,14 +33,14 @@ function StaticFallback() {
       <div className="absolute left-[8%] top-[6%] h-[68%] w-[46%] rotate-[-14deg] rounded-[22%] border border-white/15 bg-[#16172c]/90 shadow-[0_24px_48px_-16px_rgba(0,0,0,0.6)] backdrop-blur-sm">
         <div className="absolute bottom-[18%] left-[14%] flex h-[52%] items-end gap-[8%]">
           {[38, 55, 70, 62, 92].map((h, i) => (
-            <div key={i} className="w-[9%] rounded-sm bg-[#7563F4]" style={{ height: `${h}%` }} />
+            <div key={i} className="w-[9%] rounded-sm bg-[#384BFE]" style={{ height: `${h}%` }} />
           ))}
         </div>
       </div>
       <div className="absolute right-[6%] top-[26%] h-[64%] w-[46%] rotate-[9deg] rounded-[22%] border border-white/15 bg-[#1a1b32]/90 shadow-[0_24px_48px_-16px_rgba(0,0,0,0.6)] backdrop-blur-sm">
         <div className="absolute bottom-[18%] left-[14%] flex h-[52%] items-end gap-[8%]">
           {[58, 88, 48, 74, 100].map((h, i) => (
-            <div key={i} className="w-[9%] rounded-sm bg-[#9A8CFF]" style={{ height: `${h}%` }} />
+            <div key={i} className="w-[9%] rounded-sm bg-[#8FA0FF]" style={{ height: `${h}%` }} />
           ))}
         </div>
       </div>

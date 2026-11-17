@@ -1,7 +1,7 @@
 /* ============================================================================
    Young10 Marketing — landing design system
-   Pale studio surface on a dark charcoal frame, sculptural glass 3D,
-   restrained violet accents. Scoped under .y10-landing.
+   Pale studio surface on a dark charcoal frame, brand-blue accents.
+   Scoped under .y10-landing.
    ========================================================================== */
 
 .y10-landing {
@@ -11,11 +11,11 @@
 }
 
 .y10-landing ::selection {
-  background: rgba(117, 99, 244, 0.22);
+  background: rgba(56, 75, 254, 0.2);
 }
 
 .y10-landing :focus-visible {
-  outline: 2px solid #7563f4;
+  outline: 2px solid #384bfe;
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -24,37 +24,25 @@
 
 .y10-glow-hero {
   background:
-    radial-gradient(46rem 34rem at 78% 6%, rgba(117, 99, 244, 0.16), transparent 62%),
-    radial-gradient(30rem 24rem at 96% 30%, rgba(220, 221, 245, 0.9), transparent 65%),
+    radial-gradient(46rem 34rem at 78% 6%, rgba(56, 75, 254, 0.13), transparent 62%),
+    radial-gradient(30rem 24rem at 96% 30%, rgba(218, 223, 250, 0.9), transparent 65%),
     radial-gradient(38rem 26rem at 8% -6%, rgba(255, 255, 255, 0.95), transparent 60%);
 }
 
 .y10-glow-mid {
   background:
-    radial-gradient(34rem 22rem at 88% 40%, rgba(117, 99, 244, 0.08), transparent 60%),
-    radial-gradient(30rem 20rem at 4% 90%, rgba(220, 221, 245, 0.55), transparent 60%);
-}
-
-/* Soft studio ground shadow under the glass platform ------------------------- */
-
-.y10-ground-shadow {
-  background: radial-gradient(
-    closest-side,
-    rgba(23, 24, 51, 0.32),
-    rgba(23, 24, 51, 0.12) 55%,
-    transparent 75%
-  );
-  filter: blur(6px);
+    radial-gradient(34rem 22rem at 88% 40%, rgba(56, 75, 254, 0.07), transparent 60%),
+    radial-gradient(30rem 20rem at 4% 90%, rgba(218, 223, 250, 0.55), transparent 60%);
 }
 
 /* CSS glass ornaments --------------------------------------------------------- */
 
 .y10-glass-ornament {
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(233, 235, 248, 0.45) 42%, rgba(255, 255, 255, 0.75) 100%);
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(231, 235, 250, 0.45) 42%, rgba(255, 255, 255, 0.75) 100%);
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.95),
-    inset 0 -3px 8px rgba(117, 99, 244, 0.14),
+    inset 0 -3px 8px rgba(56, 75, 254, 0.13),
     inset 0 0 0 1px rgba(255, 255, 255, 0.55),
     0 14px 30px -12px rgba(31, 34, 78, 0.35);
   backdrop-filter: blur(6px);
@@ -62,70 +50,61 @@
 }
 
 .y10-glass-pebble {
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.85) 0%, rgba(226, 228, 246, 0.5) 50%, rgba(255, 255, 255, 0.7) 100%);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.85) 0%, rgba(224, 229, 248, 0.5) 50%, rgba(255, 255, 255, 0.7) 100%);
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.95),
-    inset 0 -4px 10px rgba(117, 99, 244, 0.16),
+    inset 0 -4px 10px rgba(56, 75, 254, 0.15),
     inset 0 0 0 1px rgba(255, 255, 255, 0.5),
     0 18px 34px -14px rgba(10, 11, 26, 0.45);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
 }
 
-/* Fine orbit curves inside the dark pipeline panel ---------------------------- */
+/* Hero logo glitter — a light band sweeps along the letterforms --------------- */
 
-.y10-orbit-dash {
-  stroke-dasharray: 3 7;
-  animation: y10-orbit-drift 26s linear infinite;
+.y10-logo-shimmer {
+  -webkit-mask-image: linear-gradient(
+    112deg,
+    transparent 28%,
+    rgba(0, 0, 0, 0.75) 44%,
+    #fff 50%,
+    rgba(0, 0, 0, 0.75) 56%,
+    transparent 72%
+  );
+  mask-image: linear-gradient(
+    112deg,
+    transparent 28%,
+    rgba(0, 0, 0, 0.75) 44%,
+    #fff 50%,
+    rgba(0, 0, 0, 0.75) 56%,
+    transparent 72%
+  );
+  -webkit-mask-size: 260% 100%;
+  mask-size: 260% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  filter: brightness(1.65) saturate(1.25);
+  animation: y10-shimmer-sweep 4.8s ease-in-out infinite;
 }
 
-@keyframes y10-orbit-drift {
-  to {
-    stroke-dashoffset: -400;
+@keyframes y10-shimmer-sweep {
+  0% {
+    -webkit-mask-position: 135% 0;
+    mask-position: 135% 0;
+  }
+  58%,
+  100% {
+    -webkit-mask-position: -135% 0;
+    mask-position: -135% 0;
   }
 }
 
-/* Static scene fallback (no WebGL) -------------------------------------------- */
-
-.y10-fallback-dish {
-  background:
-    radial-gradient(60% 55% at 50% 38%, rgba(255, 255, 255, 0.95), rgba(224, 226, 244, 0.55) 55%, rgba(255, 255, 255, 0.85) 100%);
-  box-shadow:
-    inset 0 2px 3px rgba(255, 255, 255, 0.95),
-    inset 0 -8px 18px rgba(101, 90, 210, 0.18),
-    0 24px 44px -18px rgba(31, 34, 78, 0.4);
-}
-
-.y10-fallback-wall {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(214, 217, 240, 0.18) 60%, rgba(255, 255, 255, 0.5));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-}
-
-.y10-fallback-bar {
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
-    inset 0 -6px 12px rgba(117, 99, 244, 0.25),
-    0 12px 24px -10px rgba(31, 34, 78, 0.35);
-}
-
-/* Scene entrance ---------------------------------------------------------------- */
-
-@keyframes y10-scene-in {
-  from {
-    opacity: 0;
-    transform: scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Motion safety ---------------------------------------------------------------- */
+/* Gentle glow breathing behind the hero logo ---------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .y10-orbit-dash {
+  .y10-logo-shimmer {
     animation: none;
+    visibility: hidden;
   }
 
   .y10-landing *,

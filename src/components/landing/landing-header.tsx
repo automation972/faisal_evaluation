@@ -21,7 +21,7 @@ export function LandingHeader({ onOpenCrm }: { onOpenCrm: () => void }) {
     <header className="relative z-40">
       <div className="flex items-center justify-between px-5 py-4 sm:px-8 lg:px-12 lg:py-5">
         <a href="#top" aria-label="Young10 Marketing — home" className="flex shrink-0 items-center">
-          <Logo variant="light" height={46} />
+          <Logo variant="light" height={58} />
         </a>
 
         {/* Desktop nav */}

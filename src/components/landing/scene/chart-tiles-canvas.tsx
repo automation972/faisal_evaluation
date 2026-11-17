@@ -1,11 +1,13 @@
-// ChartTiles — sculptural dark-glass analytics tiles with embedded violet bar-chart
-// geometry for the lower "See your pipeline at a glance" panel. Second (lazy) canvas.
+// ChartTiles — sculptural dark-glass analytics tiles with embedded brand-blue
+// bar-chart geometry for the lower "See your pipeline at a glance" panel.
+// Bars grow in with a stagger on entrance, then breathe gently. Second canvas.
 
 'use client';
 
-import { Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Suspense, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, RoundedBox } from '@react-three/drei';
+import * as THREE from 'three';
 
 import { DarkGlass, StudioEnvironment } from './scene-shared';
 
@@ -15,6 +17,67 @@ const TILE_BARS = [
   [0.34, 0.5, 0.66, 0.58, 0.9],
   [0.55, 0.85, 0.45, 0.7, 1.05],
 ] as const;
+
+const BAR_BASE_Y = -0.32;
+
+/** One chart bar: rises from the baseline with a stagger, then breathes gently. */
+function ChartBar({
+  height,
+  x,
+  delay,
+  color,
+  reducedMotion,
+  index,
+}: {
+  height: number;
+  x: number;
+  delay: number;
+  color: string;
+  reducedMotion: boolean;
+  index: number;
+}) {
+  const mesh = useRef<THREE.Mesh>(null);
+  const mat = useRef<THREE.MeshPhysicalMaterial>(null);
+  const progress = useRef(reducedMotion ? 1 : 0);
+  const started = useRef(reducedMotion);
+
+  useFrame((state, delta) => {
+    const m = mesh.current;
+    if (!m) return;
+    const t = progress.current;
+    if (t < 1) {
+      if (!started.current && state.clock.elapsedTime >= delay) started.current = true;
+      if (started.current) progress.current = Math.min(1, t + delta / 0.85);
+    }
+    const eased = 1 - Math.pow(1 - progress.current, 3);
+    const breathe =
+      progress.current >= 1 && !reducedMotion
+        ? 1 + Math.sin(state.clock.elapsedTime * 1.3 + index * 0.9) * 0.014
+        : eased;
+    m.scale.y = Math.max(0.001, breathe);
+    m.position.y = BAR_BASE_Y + (height * Math.max(0.001, breathe)) / 2;
+    if (mat.current) {
+      mat.current.emissiveIntensity =
+        progress.current >= 1 && !reducedMotion
+          ? 0.12 + Math.sin(state.clock.elapsedTime * 1.3 + index * 0.9) * 0.035
+          : 0.12 * eased;
+    }
+  });
+
+  return (
+    <mesh ref={mesh} position={[x, BAR_BASE_Y + height / 2, 0.2]} scale={[1, reducedMotion ? 1 : 0.001, 1]}>
+      <boxGeometry args={[0.13, height, 0.13]} />
+      <meshPhysicalMaterial
+        ref={mat}
+        color={color}
+        roughness={0.3}
+        clearcoat={0.9}
+        emissive={color}
+        emissiveIntensity={0.12}
+      />
+    </mesh>
+  );
+}
 
 function ChartTile({
   position,
@@ -43,16 +106,15 @@ function ChartTile({
           <DarkGlass roughness={0.24} thickness={0.8} />
         </RoundedBox>
         {bars.map((h, i) => (
-          <mesh key={i} position={[startX + i * step, -0.32 + h / 2, 0.2]}>
-            <boxGeometry args={[0.13, h, 0.13]} />
-            <meshPhysicalMaterial
-              color={i % 2 === 0 ? '#7563F4' : '#9A8CFF'}
-              roughness={0.3}
-              clearcoat={0.9}
-              emissive="#7563F4"
-              emissiveIntensity={0.12}
-            />
-          </mesh>
+          <ChartBar
+            key={i}
+            index={i}
+            height={h}
+            x={startX + i * step}
+            delay={0.7 + i * 0.12}
+            color={i % 2 === 0 ? '#384BFE' : '#8FA0FF'}
+            reducedMotion={reducedMotion}
+          />
         ))}
         {/* thin baseline */}
         <mesh position={[0, -0.36, 0.2]}>

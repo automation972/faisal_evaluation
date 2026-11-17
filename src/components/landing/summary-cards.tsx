@@ -28,7 +28,7 @@ export function SummaryCards() {
                     {card.value}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-full bg-[#7563F4] px-2.5 py-1 text-[10px] font-medium text-white">
+                <span className="shrink-0 rounded-full bg-[#384BFE] px-2.5 py-1 text-[10px] font-medium text-white transition-transform duration-200 group-hover:scale-105">
                   {card.pill}
                 </span>
               </div>

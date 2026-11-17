@@ -1,6 +1,7 @@
 // Young10 Marketing — landing page composition.
-// Dark charcoal frame, large pale surface with rounded corners, hero + glass 3D,
-// pipeline panel, capability cards, bento, analytics and footer.
+// Dark charcoal frame, large pale surface with rounded corners: animated hero
+// with the giant glittering Young10 wordmark, capability cards, bento,
+// analytics and footer. Brand-blue accent system (#384BFE).
 
 'use client';
 

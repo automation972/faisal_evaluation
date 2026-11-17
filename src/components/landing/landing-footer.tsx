@@ -12,7 +12,7 @@ export function LandingFooter() {
       <div className="flex flex-col gap-6 px-5 py-7 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-12 lg:py-8">
         <div className="flex flex-col gap-2">
           <a href="#top" aria-label="Young10 Marketing — back to top" className="w-fit">
-            <Logo variant="light" height={26} />
+            <Logo variant="light" height={56} />
           </a>
           <p className="text-[12px] text-[#777984]">We empower business growth through strategic SEO.</p>
         </div>
