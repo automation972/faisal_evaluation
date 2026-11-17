@@ -1,14 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Kumbh_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-
-const kumbhSans = Kumbh_Sans({
-  variable: "--font-kumbh-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Y10 CRM - Young10 Marketing",
@@ -32,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${kumbhSans.variable} antialiased bg-background text-foreground font-sans`}>
+      <body className="antialiased bg-background text-foreground font-sans">
         {children}
         <Toaster position="top-right" richColors />
       </body>

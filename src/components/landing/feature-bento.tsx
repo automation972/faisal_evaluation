@@ -17,8 +17,26 @@ export function FeatureBento({ onOpenCrm }: { onOpenCrm: () => void }) {
   const reduced = useReducedMotion() ?? false;
 
   return (
-    <section aria-label="CRM highlights" className="px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14">
-      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr] lg:gap-5">
+    <section aria-label="CRM highlights" className="px-4 pt-14 sm:px-6 lg:px-8 lg:pt-20">
+      {/* section header */}
+      <Reveal className="mx-auto max-w-[620px] text-center">
+        <span className="inline-flex items-center gap-2 rounded-full border border-[#384BFE]/20 bg-[#384BFE]/8 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#2B3AD1]">
+          <span className="size-1.5 rounded-full bg-[#384BFE]" aria-hidden />
+          Why Young10
+        </span>
+        <h2 className="mt-4 text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.14] tracking-[-0.028em] text-[#10111A]">
+          Built for the way marketing teams{' '}
+          <em className="font-[family-name:var(--font-y10-serif)] font-normal italic text-[#384BFE]">
+            actually
+          </em>{' '}sell.
+        </h2>
+        <p className="mx-auto mt-3 max-w-[460px] text-[14px] leading-relaxed text-[#777984]">
+          Real relationships, real momentum — see how Young10 keeps every deal
+          and follow-up on track.
+        </p>
+      </Reveal>
+
+      <div className="mt-10 grid gap-5 lg:mt-12 lg:grid-cols-[1.35fr_1fr]">
         {/* LEFT — contact profile showcase */}
         <Reveal className="h-full">
           <div className="flex h-full flex-col gap-6 rounded-[28px] border border-black/5 bg-white p-6 sm:flex-row sm:items-center lg:gap-8 lg:p-8">
@@ -29,6 +47,7 @@ export function FeatureBento({ onOpenCrm }: { onOpenCrm: () => void }) {
                 alt="Sarah Mitchell, sales representative at Young10 Marketing"
                 width={864}
                 height={1152}
+                priority
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.04]"
               />
               <div
@@ -87,7 +106,7 @@ export function FeatureBento({ onOpenCrm }: { onOpenCrm: () => void }) {
 
         {/* RIGHT — dark value card */}
         <Reveal className="h-full" delay={0.08}>
-          <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] bg-[#0C0D1C] p-7 lg:p-8">
+          <div className="relative flex h-full flex-col overflow-hidden rounded-[28px] bg-[#0B0C1A] p-7 lg:p-8">
             <div
               className="pointer-events-none absolute -right-14 -top-20 size-64 rounded-full bg-[#384BFE]/22 blur-3xl"
               aria-hidden

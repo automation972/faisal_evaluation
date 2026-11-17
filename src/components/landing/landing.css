@@ -1,6 +1,6 @@
 /* ============================================================================
    Young10 Marketing — landing design system
-   Simple, clean, premium. Pale surface, brand blue #384BFE, soft motion.
+   Cinematic dark hero (real footage), pale body sheet, brand blue #384BFE.
    ========================================================================== */
 
 .y10-landing {
@@ -19,29 +19,102 @@
   border-radius: 8px;
 }
 
-/* Soft atmospheric washes ---------------------------------------------------- */
+/* Cinematic hero overlays ---------------------------------------------------- */
 
-.y10-glow-hero {
-  background:
-    radial-gradient(44rem 32rem at 76% 8%, rgba(56, 75, 254, 0.1), transparent 62%),
-    radial-gradient(34rem 26rem at 6% -4%, rgba(255, 255, 255, 0.95), transparent 60%);
-}
-
-.y10-glow-mid {
-  background:
-    radial-gradient(32rem 22rem at 90% 44%, rgba(56, 75, 254, 0.06), transparent 60%),
-    radial-gradient(28rem 20rem at 2% 92%, rgba(56, 75, 254, 0.05), transparent 60%);
-}
-
-/* Hero logo glow -------------------------------------------------------------- */
-
-.y10-logo-glow {
+/* gentle vignette so edges feel graded, like a film still */
+.y10-hero-vignette {
   background: radial-gradient(
-    52% 52% at 50% 46%,
-    rgba(56, 75, 254, 0.16),
-    rgba(56, 75, 254, 0.06) 55%,
-    transparent 75%
+    118% 118% at 50% 38%,
+    transparent 52%,
+    rgba(6, 8, 20, 0.52) 100%
   );
+}
+
+/* brand-blue light bloom behind the headline */
+.y10-hero-blueglow {
+  background:
+    radial-gradient(46rem 30rem at 50% 26%, rgba(56, 75, 254, 0.26), transparent 64%),
+    radial-gradient(30rem 22rem at 84% 68%, rgba(56, 75, 254, 0.14), transparent 62%);
+}
+
+/* slow "living" bloom that keeps the hero from feeling like a static screenshot */
+.y10-hero-breath {
+  background: radial-gradient(52rem 34rem at 50% 100%, rgba(56, 75, 254, 0.16), transparent 70%);
+  animation: y10-breath 9s ease-in-out infinite;
+}
+
+@keyframes y10-breath {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Scroll cue ------------------------------------------------------------------ */
+
+.y10-scroll-dot {
+  animation: y10-scroll-dot 1.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes y10-scroll-dot {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(11px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+
+/* Tilt cards — 3D summary cards ---------------------------------------------- */
+
+.y10-tilt-scene {
+  perspective: 1100px;
+}
+
+.y10-tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* shine sweep across the card on hover */
+.y10-card-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.y10-card-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(56, 75, 254, 0.07) 44%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(56, 75, 254, 0.07) 56%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.y10-tilt-scene:hover .y10-card-shine::after {
+  transform: translateX(130%);
+}
+
+/* floating content layer inside tilt cards */
+.y10-tilt-pop {
+  transform: translateZ(30px);
 }
 
 /* Chart grid inside the dark analytics panel ---------------------------------- */
@@ -55,6 +128,47 @@
   mask-image: radial-gradient(80% 90% at 55% 40%, #000 30%, transparent 100%);
 }
 
+/* Stage bars shimmer inside dark panel ---------------------------------------- */
+
+.y10-stage-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.y10-stage-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 80%
+  );
+  transform: translateX(-120%);
+  animation: y10-stage-shimmer 3.4s ease-in-out infinite;
+  animation-delay: 1.6s;
+}
+
+@keyframes y10-stage-shimmer {
+  0%,
+  55%,
+  100% {
+    transform: translateX(-120%);
+  }
+  80% {
+    transform: translateX(120%);
+  }
+}
+
+/* Body sheet atmospheric wash --------------------------------------------------- */
+
+.y10-glow-mid {
+  background:
+    radial-gradient(32rem 22rem at 90% 44%, rgba(56, 75, 254, 0.06), transparent 60%),
+    radial-gradient(28rem 20rem at 2% 92%, rgba(56, 75, 254, 0.05), transparent 60%);
+}
+
 /* Motion safety ---------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -63,5 +177,6 @@
   .y10-landing *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
   }
 }
