@@ -1,5 +1,6 @@
 // Young10 Marketing CRM - application shell (single-page)
-// Unauthenticated -> auth screen. Authenticated -> CRM workspace.
+// Unauthenticated -> marketing landing ("Open CRM" / "Get Started" -> auth screen).
+// Authenticated -> CRM workspace.
 
 'use client';
 
@@ -7,6 +8,7 @@ import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMe } from '@/hooks/use-crm';
 import AuthScreen from '@/components/auth/auth-screen';
+import LandingPage from '@/components/landing/landing-page';
 import { DesktopSidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
 import DashboardView from '@/components/dashboard/dashboard-view';
@@ -33,9 +35,16 @@ function BrandSplash() {
 function CrmWorkspace() {
   const view = useCrmStore((s) => s.view);
   const { data: user, isLoading } = useMe();
+  const [showAuth, setShowAuth] = useState(false);
 
   if (isLoading) return <BrandSplash />;
-  if (!user) return <AuthScreen />;
+  if (!user) {
+    return showAuth ? (
+      <AuthScreen onBack={() => setShowAuth(false)} />
+    ) : (
+      <LandingPage onOpenCrm={() => setShowAuth(true)} />
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#F5F6FB]">
