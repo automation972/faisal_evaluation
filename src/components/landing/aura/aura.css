@@ -1,0 +1,336 @@
+/* ============================================================
+   Aura-inspired landing for Young10 Marketing CRM (light theme)
+   - Inter typeface (spec weights 400–900)
+   - shiny headline sweep
+   - light "liquid-glass" card treatment
+   - c3-* cinematic pricing system (light adaptation)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+.aura-root {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.aura-root ::selection {
+  background: rgba(61, 129, 227, 0.3);
+}
+
+/* Shiny gradient sweep on the headline word */
+.aura-root .animate-shiny {
+  animation: aura-shiny 6s linear infinite;
+}
+
+@keyframes aura-shiny {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Full-width floating light deck — every section sits on the video canvas */
+.aura-root .liquid-deck {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
+  backdrop-filter: blur(20px) saturate(1.35);
+  -webkit-backdrop-filter: blur(20px) saturate(1.35);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    0 24px 80px -24px rgba(4, 8, 24, 0.45);
+}
+
+/* Liquid glass — light variant */
+.aura-root .liquid-glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.85),
+    0 10px 30px -12px rgba(11, 18, 36, 0.18);
+  position: relative;
+  overflow: hidden;
+}
+
+.aura-root .liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 18, 36, 0.26) 0%,
+    rgba(11, 18, 36, 0.1) 20%,
+    rgba(11, 18, 36, 0) 40%,
+    rgba(11, 18, 36, 0) 60%,
+    rgba(11, 18, 36, 0.1) 80%,
+    rgba(11, 18, 36, 0.26) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Slim scrollbar inside the CRM mockup panes */
+.aura-slim {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 18, 36, 0.18) transparent;
+}
+.aura-slim::-webkit-scrollbar {
+  width: 6px;
+}
+.aura-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.aura-slim::-webkit-scrollbar-thumb {
+  background: rgba(11, 18, 36, 0.15);
+  border-radius: 999px;
+}
+
+/* ============================================================
+   Pricing — cinematic typography (light adaptation, same geometry)
+   ============================================================ */
+
+.c3-pricing-section {
+  position: relative;
+  padding: 40px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+.c3-watermark-container {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  text-align: center;
+  margin-top: 40px;
+  z-index: 2;
+}
+
+.c3-watermark-main {
+  font-size: 9rem;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  filter: url(#c3-noise);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.c3-watermark-line-1 {
+  color: #0b1224;
+}
+
+.c3-watermark-line-2 {
+  background: linear-gradient(to right, #091020 0%, #0b2551 25%, #a4f4fd 65%, #00d2ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.c3-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 1100px;
+  margin-top: 60px;
+  transform: translateX(20px);
+  position: relative;
+  z-index: 3;
+}
+
+.c3-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.66));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(11, 18, 36, 0.85);
+  border-radius: 44px;
+  padding: 50px 24px;
+  min-height: 580px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.c3-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 50%);
+  pointer-events: none;
+}
+
+.c3-card:hover {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(61, 129, 227, 0.8);
+  transform: translateY(-12px) scale(1.01);
+}
+
+.c3-card-pro {
+  background: linear-gradient(135deg, rgba(246, 249, 255, 0.98), rgba(238, 244, 252, 0.74));
+}
+
+.c3-tier-small {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: rgba(11, 18, 36, 0.6);
+}
+
+.c3-tier-large {
+  font-size: 2.8rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0b1224;
+  margin-top: 8px;
+}
+
+.c3-desc {
+  font-size: 0.88rem;
+  color: rgba(11, 18, 36, 0.5);
+  min-height: 3.2em;
+  margin-top: 16px;
+  margin-bottom: 40px;
+  line-height: 1.5;
+}
+
+.c3-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.c3-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 0.92rem;
+  color: rgba(11, 18, 36, 0.8);
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+
+.c3-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(11, 18, 36, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.c3-btn {
+  background: #0b1224;
+  color: #ffffff;
+  padding: 10px 32px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-top: auto;
+  border: none;
+  cursor: pointer;
+  align-self: center;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.c3-btn:hover {
+  background: #1b2748;
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(11, 18, 36, 0.25);
+}
+
+.c3-toggle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+  max-width: 1100px;
+  margin-top: 32px;
+  padding-right: 20px;
+}
+
+.c3-toggle {
+  width: 52px;
+  height: 28px;
+  background: #0b1224;
+  border-radius: 100px;
+  position: relative;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+}
+
+.c3-toggle-knob {
+  width: 20px;
+  height: 20px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.c3-toggle.active {
+  background: rgba(11, 18, 36, 0.35);
+}
+
+.c3-toggle.active .c3-toggle-knob {
+  transform: translateX(24px);
+  background: #ffffff;
+}
+
+@media (max-width: 1024px) {
+  .c3-watermark-main {
+    font-size: 3.5rem;
+    filter: none;
+  }
+
+  .c3-watermark-line-2 {
+    background: none;
+    -webkit-text-fill-color: #00d2ff;
+    color: #00d2ff;
+  }
+
+  .c3-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    transform: none;
+    width: 100vw;
+    padding: 0 20px;
+    gap: 16px;
+    scrollbar-width: none;
+  }
+
+  .c3-card {
+    flex: 0 0 320px;
+    scroll-snap-align: center;
+  }
+
+  .c3-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .c3-toggle-wrap {
+    justify-content: center;
+    padding-right: 0;
+  }
+}
