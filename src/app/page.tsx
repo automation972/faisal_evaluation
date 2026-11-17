@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMe } from '@/hooks/use-crm';
 import AuthScreen from '@/components/auth/auth-screen';
-import { LandingPage } from '@/components/landing/landing-page';
+import { LandingPage } from '@/components/landing/vesper-landing';
 import { DesktopSidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
 import DashboardView from '@/components/dashboard/dashboard-view';
