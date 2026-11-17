@@ -12,6 +12,9 @@ A production-ready, full-stack Customer Relationship Management platform built f
 
 The design system, wordmark, and color theme are derived directly from [young10marketing.com](https://young10marketing.com/).
 
+**Live App:** [https://faisal-evaluation.vercel.app](https://faisal-evaluation.vercel.app) — production deployment on Vercel.
+
+[![Live App](https://img.shields.io/badge/Live-faisal--evaluation.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://faisal-evaluation.vercel.app)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript 5](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -418,6 +421,8 @@ The sign-in screen also includes one-click demo buttons that autofill these cred
 ## Deployment
 
 ### Vercel — one project, three services (recommended)
+
+> **The production deployment of this repository is live at [https://faisal-evaluation.vercel.app](https://faisal-evaluation.vercel.app).**
 
 The repository ships with a `vercel.json` that defines a **single Vercel project** containing all three components as services, with shared environment variables and one domain:
 
