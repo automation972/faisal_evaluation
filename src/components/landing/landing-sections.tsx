@@ -4,8 +4,8 @@
 
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import {
   Award,
   ChevronRight,
@@ -23,6 +23,52 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+
+/* ---------------------------------------------------------------------------
+   Tilt3D — interactive 3D perspective tilt (mouse-driven) with spring return.
+   Wraps any card so it feels physically alive instead of flat.
+   -------------------------------------------------------------------------- */
+
+export function Tilt3D({
+  children,
+  className,
+  max = 7,
+}: {
+  children: ReactNode;
+  className?: string;
+  max?: number;
+}) {
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const rotateX = useSpring(rx, { stiffness: 160, damping: 16, mass: 0.6 });
+  const rotateY = useSpring(ry, { stiffness: 160, damping: 16, mass: 0.6 });
+
+  function handleMove(event: ReactMouseEvent<HTMLDivElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width - 0.5;
+    const py = (event.clientY - rect.top) / rect.height - 0.5;
+    ry.set(px * max * 2);
+    rx.set(-py * max * 2);
+  }
+
+  function handleLeave() {
+    rx.set(0);
+    ry.set(0);
+  }
+
+  return (
+    <div className={cn('y10-perspective', className)}>
+      <motion.div
+        onMouseMove={handleMove}
+        onMouseLeave={handleLeave}
+        style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        className="y10-preserve-3d h-full w-full"
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
 
 /* ---------------------------------------------------------------------------
    Rise — resilient scroll-reveal wrapper.
@@ -213,33 +259,37 @@ export function GrowthSection() {
           </div>
         </Rise>
 
-        <Rise delay={0.12} className="rounded-2xl border border-[#0F0D1D]/[0.07] bg-white p-6 card-shadow">
-          <div className="flex items-center justify-between px-1 pb-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5f6274]">
-              This month · Growth snapshot
-            </p>
-            <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#16a34a] opacity-60" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#16a34a]" />
-            </span>
-          </div>
-          <div className="space-y-3">
-            {SNAPSHOT.map((row) => (
-              <div
-                key={row.label}
-                className="flex items-center justify-between gap-4 rounded-xl bg-[#F5F6FB] px-4 py-3.5 transition-colors hover:bg-[#EEF0FA]"
-              >
-                <span className="flex min-w-0 items-center gap-2.5">
-                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: row.dot }} aria-hidden="true" />
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold text-[#0F0D1D]">{row.label}</span>
-                    <span className="block truncate text-xs text-[#7A7A7A]">{row.note}</span>
-                  </span>
+        <Rise delay={0.12}>
+          <Tilt3D max={4}>
+            <div className="rounded-2xl border border-[#0F0D1D]/[0.07] bg-white p-6 card-shadow">
+              <div className="flex items-center justify-between px-1 pb-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5f6274]">
+                  This month · Growth snapshot
+                </p>
+                <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#16a34a] opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#16a34a]" />
                 </span>
-                <span className="shrink-0 text-lg font-semibold tracking-tight text-[#0F0D1D]">{row.value}</span>
               </div>
-            ))}
-          </div>
+              <div className="space-y-3">
+                {SNAPSHOT.map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between gap-4 rounded-xl bg-[#F5F6FB] px-4 py-3.5 transition-colors hover:bg-[#EEF0FA]"
+                  >
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: row.dot }} aria-hidden="true" />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold text-[#0F0D1D]">{row.label}</span>
+                        <span className="block truncate text-xs text-[#7A7A7A]">{row.note}</span>
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-lg font-semibold tracking-tight text-[#0F0D1D]">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Tilt3D>
         </Rise>
       </div>
     </section>
@@ -345,18 +395,16 @@ export function ServicesSection() {
 
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {SERVICES.map((service, i) => (
-          <Rise
-            key={service.name}
-            as="figure"
-            delay={(i % 3) * 0.08}
-            distance={20}
-            className="card-lift group rounded-2xl border border-[#0F0D1D]/[0.07] bg-white p-6 card-shadow"
-          >
-            <div className="stat-icon stat-icon-blue flex h-11 w-11 items-center justify-center rounded-xl bg-[#384BFE]/10 text-[#384BFE]">
-              <service.icon className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <figcaption className="mt-5 text-base font-semibold text-[#0F0D1D]">{service.name}</figcaption>
-            <p className="mt-2.5 text-sm leading-[1.65] text-[#7A7A7A]">{service.desc}</p>
+          <Rise key={service.name} as="figure" delay={(i % 3) * 0.08} distance={20} className="h-full">
+            <Tilt3D max={8} className="h-full">
+              <div className="card-lift group flex h-full flex-col rounded-2xl border border-[#0F0D1D]/[0.07] bg-white p-6 card-shadow">
+                <div className="stat-icon stat-icon-blue flex h-11 w-11 items-center justify-center rounded-xl bg-[#384BFE]/10 text-[#384BFE]">
+                  <service.icon className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <figcaption className="mt-5 text-base font-semibold text-[#0F0D1D]">{service.name}</figcaption>
+                <p className="mt-2.5 text-sm leading-[1.65] text-[#7A7A7A]">{service.desc}</p>
+              </div>
+            </Tilt3D>
           </Rise>
         ))}
       </div>
@@ -376,7 +424,7 @@ export function FinalCta() {
         distance={32}
         className="brand-gradient relative overflow-hidden rounded-[2rem] px-8 py-16 text-center shadow-[0_32px_80px_-32px_rgba(43,58,209,0.55)] md:py-20"
       >
-        {/* Decorative floating orbs */}
+        {/* Decorative floating orbs + slow-rotating 3D rings */}
         <div
           aria-hidden="true"
           className="animate-float-slow pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
@@ -384,6 +432,14 @@ export function FinalCta() {
         <div
           aria-hidden="true"
           className="animate-float-slow pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full bg-[#0F0D1D]/25 blur-3xl [animation-delay:-3.5s]"
+        />
+        <div
+          aria-hidden="true"
+          className="animate-spin-slow pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full border border-white/15"
+        />
+        <div
+          aria-hidden="true"
+          className="animate-spin-slow pointer-events-none absolute -left-28 bottom-[-6rem] h-72 w-72 rounded-full border border-dashed border-white/20 [animation-delay:-8s]"
         />
         <div
           aria-hidden="true"

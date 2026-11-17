@@ -5,7 +5,7 @@
 'use client';
 
 import { useState, type CSSProperties, type MouseEvent } from 'react';
-import { Menu as MenuIcon, Sparkles, X } from 'lucide-react';
+import { Menu as MenuIcon, Sparkles, TrendingUp, X } from 'lucide-react';
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 import {
@@ -15,6 +15,7 @@ import {
   LandingFooter,
   Rise,
   ServicesSection,
+  Tilt3D,
   Y10Button,
 } from '@/components/landing/landing-sections';
 
@@ -169,6 +170,10 @@ function Hero({ onSignIn }: { onSignIn: () => void }) {
   const orb1y = useTransform(sy, (v) => v * 30);
   const orb2x = useTransform(sx, (v) => v * -55);
   const orb2y = useTransform(sy, (v) => v * -35);
+  const chip1x = useTransform(sx, (v) => v * 26);
+  const chip1y = useTransform(sy, (v) => v * 20);
+  const chip2x = useTransform(sx, (v) => v * -34);
+  const chip2y = useTransform(sy, (v) => v * -26);
 
   function handleMove(event: MouseEvent<HTMLElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -197,6 +202,38 @@ function Hero({ onSignIn }: { onSignIn: () => void }) {
         className="animate-float-slow pointer-events-none absolute left-[16%] top-[58%] hidden h-40 w-40 rounded-full bg-[#384BFE]/10 blur-[80px] lg:block"
       />
 
+      {/* Floating 3D glass chips (desktop only) — depth + product reality */}
+      <motion.div
+        aria-hidden="true"
+        style={{ x: chip1x, y: chip1y }}
+        className="y10-chip left-[2%] top-[26%] -rotate-6"
+      >
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#384BFE]/10 text-[#384BFE]">
+          <TrendingUp className="h-5 w-5" />
+        </span>
+        <span>
+          <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[#7A7A7A]">
+            Page-one rankings
+          </span>
+          <span className="block text-sm font-semibold text-[#0F0D1D]">38 this month ↑</span>
+        </span>
+      </motion.div>
+      <motion.div
+        aria-hidden="true"
+        style={{ x: chip2x, y: chip2y }}
+        className="y10-chip right-[1.5%] top-[38%] rotate-[5deg] [animation-delay:-2.5s] animate-float-slow"
+      >
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#384BFE]/10 text-[#384BFE]">
+          <Sparkles className="h-5 w-5" />
+        </span>
+        <span>
+          <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[#7A7A7A]">
+            AI lead score
+          </span>
+          <span className="block text-sm font-semibold text-[#0F0D1D]">87 · HOT lead</span>
+        </span>
+      </motion.div>
+
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
@@ -210,10 +247,11 @@ function Hero({ onSignIn }: { onSignIn: () => void }) {
       </motion.div>
 
       <motion.h1
-        initial={{ opacity: 0, y: 26 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-7 text-5xl font-semibold leading-[0.95] tracking-tight text-[#0F0D1D] md:text-7xl"
+        initial={{ opacity: 0, y: 30, rotateX: 16 }}
+        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+        transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        style={{ transformPerspective: 1100 }}
+        className="y10-preserve-3d mt-7 text-5xl font-semibold leading-[0.95] tracking-tight text-[#0F0D1D] md:text-7xl"
       >
         Your growth.
         <br />
@@ -267,19 +305,30 @@ const STATS = [
 function StatsBand() {
   return (
     <Rise distance={24} className="relative z-10 mx-auto max-w-6xl px-6">
-      <div
-        className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[#0F0D1D]/[0.07] bg-[#0F0D1D]/[0.06] shadow-[0_24px_60px_-30px_rgba(31,34,78,0.25)] md:grid-cols-4"
-        aria-label="Agency results at a glance"
-      >
-        {STATS.map((stat) => (
-          <div key={stat.label} className="bg-white px-6 py-7 text-center transition-colors hover:bg-[#F8F9FE]">
-            <p className="text-3xl font-semibold tracking-tight text-[#384BFE] md:text-4xl">
-              {stat.value}
-              <span className="text-2xl md:text-3xl">{stat.suffix}</span>
-            </p>
-            <p className="mt-2 text-xs font-medium text-[#5f6274] md:text-sm">{stat.label}</p>
-          </div>
-        ))}
+      <div className="y10-perspective">
+        <motion.div
+          initial={{ opacity: 0, rotateX: 12, y: 30 }}
+          animate={{ opacity: 1, rotateX: 0, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          style={{ transformPerspective: 1100 }}
+        >
+          <Tilt3D max={4}>
+            <div
+              className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[#0F0D1D]/[0.07] bg-[#0F0D1D]/[0.06] shadow-[0_24px_60px_-30px_rgba(31,34,78,0.25)] md:grid-cols-4"
+              aria-label="Agency results at a glance"
+            >
+              {STATS.map((stat) => (
+                <div key={stat.label} className="bg-white px-6 py-7 text-center transition-colors hover:bg-[#F8F9FE]">
+                  <p className="text-3xl font-semibold tracking-tight text-[#384BFE] md:text-4xl">
+                    {stat.value}
+                    <span className="text-2xl md:text-3xl">{stat.suffix}</span>
+                  </p>
+                  <p className="mt-2 text-xs font-medium text-[#5f6274] md:text-sm">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          </Tilt3D>
+        </motion.div>
       </div>
     </Rise>
   );
@@ -292,24 +341,27 @@ function StatsBand() {
 export function LandingPage({ onSignIn }: { onSignIn: () => void }) {
   return (
     <div className="y10-landing relative flex min-h-screen flex-col overflow-x-hidden text-[#0F0D1D]">
-      {/* Fullscreen looping background video (kept) — veiled for the light theme */}
+      {/* Fullscreen looping background video (kept) — brand-blue duotone for the light theme */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="pointer-events-none h-full w-full object-cover"
+          className="pointer-events-none h-full w-full object-cover [filter:grayscale(100%)_brightness(1.06)_contrast(1.03)]"
           src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260508_064122_c4750c0e-7476-4b44-94a2-a85a65c63bf2.mp4"
         />
-        {/* Light veil: keeps the motion visible while the page stays bright */}
-        <div className="absolute inset-0 bg-[#F5F6FB]/85" aria-hidden="true" />
+        {/* Blue duotone: paints the animated ribbon in the Y10 brand blue */}
+        <div className="absolute inset-0 bg-[#384BFE] mix-blend-color" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[#384BFE]/[0.14] mix-blend-multiply" aria-hidden="true" />
+        {/* Light veil: keeps the page bright while the blue motion stays visible */}
+        <div className="absolute inset-0 bg-[#F5F6FB]/55" aria-hidden="true" />
         <div
           className="absolute inset-0"
           aria-hidden="true"
           style={{
             background:
-              'radial-gradient(80rem 42rem at 50% -8%, rgba(255,255,255,0.9), transparent 62%), linear-gradient(180deg, rgba(245,246,251,0.2) 0%, rgba(245,246,251,0.72) 46%, #F5F6FB 88%)',
+              'radial-gradient(80rem 42rem at 50% -8%, rgba(255,255,255,0.88), transparent 62%), linear-gradient(180deg, rgba(245,246,251,0.1) 0%, rgba(245,246,251,0.55) 46%, #F5F6FB 88%)',
           }}
         />
       </div>
@@ -317,11 +369,11 @@ export function LandingPage({ onSignIn }: { onSignIn: () => void }) {
       {/* Vertical guide lines at the container edges (desktop only) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-y-0 left-1/2 z-[5] hidden w-px -translate-x-[calc(50%+36rem)] bg-[#0F0D1D]/[0.06] md:block"
+        className="pointer-events-none fixed inset-y-0 left-1/2 z-[5] hidden w-px -translate-x-[calc(50%+36rem)] bg-[#384BFE]/25 md:block"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-y-0 left-1/2 z-[5] hidden w-px translate-x-[calc(-50%+36rem)] bg-[#0F0D1D]/[0.06] md:block"
+        className="pointer-events-none fixed inset-y-0 left-1/2 z-[5] hidden w-px translate-x-[calc(-50%+36rem)] bg-[#384BFE]/25 md:block"
       />
 
       <Navbar onSignIn={onSignIn} />
