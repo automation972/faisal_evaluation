@@ -52,7 +52,7 @@ export function LandingHeader({ onOpenCrm }: { onOpenCrm: () => void }) {
 
       <div
         className={`mx-auto flex w-full max-w-[1280px] items-center justify-between gap-6 px-5 transition-all duration-500 sm:px-8 ${
-          scrolled ? 'h-[60px]' : 'h-[76px]'
+          scrolled ? 'h-[64px]' : 'h-[80px]'
         }`}
       >
         {/* brand */}
@@ -68,7 +68,7 @@ export function LandingHeader({ onOpenCrm }: { onOpenCrm: () => void }) {
             />
             <Logo
               variant="white"
-              height={scrolled ? 34 : 38}
+              height={scrolled ? 40 : 46}
               className="relative transition-[transform,height] duration-500 group-hover:scale-[1.03]"
             />
           </span>

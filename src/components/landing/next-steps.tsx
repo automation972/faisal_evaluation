@@ -1,7 +1,8 @@
 // Lower section — premium two-part composition:
-// 1. "How it works": centred header, three steps joined by a connector line.
+// 1. "How it works": editorial three-step rail — oversized ghost numerals on
+//    hairline rules, no boxed cards.
 // 2. Dark analytics panel: editorial split layout — copy + KPI chips left,
-//    animated horizontal stage bars (with shimmer) right.
+//    animated horizontal stage bars with per-stage values right.
 
 'use client';
 
@@ -32,57 +33,65 @@ const STEPS = [
 ];
 
 const STAGES = [
-  { name: 'Discovery', count: 3, width: 72 },
-  { name: 'Proposal', count: 4, width: 100 },
-  { name: 'Negotiation', count: 2, width: 50 },
+  { name: 'Discovery', count: 3, value: '$6,900', width: 46 },
+  { name: 'Proposal', count: 4, value: '$11,200', width: 78 },
+  { name: 'Negotiation', count: 2, value: '$8,400', width: 56 },
 ];
 
 export function NextStepsSection() {
   const reduced = useReducedMotion() ?? false;
 
   return (
-    <section className="px-4 pb-16 pt-14 sm:px-6 lg:px-8 lg:pb-24 lg:pt-20">
+    <section className="px-4 pb-20 pt-16 sm:px-6 lg:px-8 lg:pb-28 lg:pt-24">
       {/* ---- How it works ---- */}
       <div id="how-it-works" className="mx-auto max-w-[1200px] scroll-mt-24">
-        <Reveal className="mx-auto max-w-[620px] text-center">
+        <Reveal className="mx-auto max-w-[640px] text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-[#384BFE]/20 bg-[#384BFE]/8 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#2B3AD1]">
             <span className="size-1.5 rounded-full bg-[#384BFE]" aria-hidden />
             How it works
           </span>
-          <h2 className="mt-4 text-[clamp(1.7rem,3.2vw,2.4rem)] font-medium leading-[1.14] tracking-[-0.028em] text-[#10111A]">
+          <h2 className="mt-4 text-[clamp(1.8rem,3.4vw,2.55rem)] font-medium leading-[1.14] tracking-[-0.028em] text-[#10111A]">
             From first hello to{' '}
             <em className="font-[family-name:var(--font-y10-serif)] font-normal italic text-[#384BFE]">
               signed
             </em>{' '}
             deal.
           </h2>
-          <p className="mx-auto mt-3 max-w-[460px] text-[14px] leading-relaxed text-[#777984]">
+          <p className="mx-auto mt-3.5 max-w-[480px] text-[14.5px] leading-relaxed text-[#777984]">
             Young10 CRM turns scattered spreadsheets into one simple rhythm —
             capture, nurture, convert.
           </p>
         </Reveal>
 
-        <div className="relative mt-10 grid gap-5 sm:grid-cols-3 lg:mt-12">
-          {/* connector line (desktop) */}
-          <motion.span
-            className="pointer-events-none absolute left-[12%] right-[12%] top-10 hidden border-t border-dashed border-[#384BFE]/25 sm:block"
-            initial={reduced ? undefined : { scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.1, delay: 0.35, ease: EASE }}
-            aria-hidden
-          />
-
+        {/* editorial step rail */}
+        <div className="relative mx-auto mt-12 grid max-w-[1100px] gap-x-10 gap-y-8 sm:grid-cols-3 lg:mt-16">
           {STEPS.map((step, i) => (
-            <Reveal key={step.n} delay={0.15 + i * 0.14} y={28}>
-              <div className="group relative h-full rounded-[26px] border border-black/[0.06] bg-white p-6 text-center shadow-[0_2px_14px_-6px_rgba(23,26,72,0.12)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_26px_52px_-24px_rgba(56,75,254,0.4)] sm:text-left">
-                <span className="relative mx-auto grid size-11 place-items-center rounded-full bg-gradient-to-br from-[#5F72FF] to-[#384BFE] text-[13px] font-semibold text-white shadow-[0_10px_22px_-8px_rgba(56,75,254,0.6)] transition-transform duration-300 group-hover:scale-105 sm:mx-0">
+            <Reveal key={step.n} delay={0.15 + i * 0.14} y={26}>
+              <div className="group relative">
+                {/* hairline top rule with animated progress */}
+                <span
+                  className="absolute inset-x-0 top-0 h-px bg-[#E3E5EF]"
+                  aria-hidden
+                />
+                <motion.span
+                  className="absolute inset-x-0 top-0 h-px origin-left bg-gradient-to-r from-[#384BFE] to-[#8FA0FF]"
+                  initial={reduced ? undefined : { scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.9, delay: 0.3 + i * 0.15, ease: EASE }}
+                  aria-hidden
+                />
+
+                {/* ghost numeral */}
+                <p
+                  className="mt-5 bg-gradient-to-b from-[#384BFE]/16 to-[#384BFE]/[0.04] bg-clip-text text-[52px] font-semibold leading-none tracking-tight text-transparent transition-all duration-300 group-hover:from-[#384BFE]/30 sm:text-[56px]"
+                >
                   {step.n}
-                </span>
-                <p className="mt-5 text-[16px] font-semibold tracking-tight text-[#10111A]">
+                </p>
+                <p className="mt-3 text-[17px] font-semibold tracking-tight text-[#10111A]">
                   {step.title}
                 </p>
-                <p className="mt-2 text-[13px] leading-relaxed text-[#777984]">
+                <p className="mt-2 max-w-[300px] text-[13.5px] leading-relaxed text-[#777984]">
                   {step.copy}
                 </p>
               </div>
@@ -92,7 +101,7 @@ export function NextStepsSection() {
       </div>
 
       {/* ---- Dark analytics panel ---- */}
-      <Reveal className="mx-auto mt-14 max-w-[1200px] lg:mt-20">
+      <Reveal className="mx-auto mt-16 max-w-[1200px] lg:mt-24">
         <div className="relative overflow-hidden rounded-[36px] bg-[#0B0C1A] p-7 sm:p-9 lg:p-12">
           {/* atmosphere */}
           <div className="y10-chart-grid pointer-events-none absolute inset-0" aria-hidden />
@@ -153,7 +162,7 @@ export function NextStepsSection() {
               </div>
             </div>
 
-            {/* animated stage bars */}
+            {/* realistic pipeline readout */}
             <div className="rounded-[26px] border border-white/10 bg-white/[0.04] p-6 backdrop-blur-md sm:p-8">
               <div className="flex items-center justify-between">
                 <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-white/55">
@@ -172,13 +181,17 @@ export function NextStepsSection() {
                 {STAGES.map((stage, i) => (
                   <div key={stage.name}>
                     <div className="mb-2.5 flex items-baseline justify-between">
-                      <p className="text-[13.5px] font-medium text-white/80">{stage.name}</p>
-                      <p className="text-[12.5px] font-medium text-white/50">
-                        <span className="text-[15px] font-semibold text-white">{stage.count}</span>{' '}
-                        deals
+                      <p className="text-[13.5px] font-medium text-white/80">
+                        {stage.name}
+                        <span className="ml-2 text-[11px] font-normal tabular-nums text-white/40">
+                          {stage.count} deals
+                        </span>
+                      </p>
+                      <p className="text-[12px] font-semibold tabular-nums text-white/85">
+                        {stage.value}
                       </p>
                     </div>
-                    <div className="h-3 w-full overflow-hidden rounded-full bg-white/8">
+                    <div className="relative h-3 w-full overflow-hidden rounded-full bg-white/8">
                       <motion.div
                         className="y10-stage-fill h-full rounded-full bg-gradient-to-r from-[#2B3AD1] via-[#384BFE] to-[#8FA0FF] shadow-[0_0_18px_-2px_rgba(56,75,254,0.7)]"
                         initial={reduced ? undefined : { width: '6%' }}
@@ -191,7 +204,18 @@ export function NextStepsSection() {
                 ))}
               </div>
 
+              {/* total row */}
               <div className="mt-7 flex items-center justify-between border-t border-white/8 pt-4">
+                <p className="text-[11.5px] text-white/45">
+                  Total open value
+                  <span className="ml-2 text-[10px] text-white/30">9 deals · 3 stages</span>
+                </p>
+                <p className="text-[15px] font-semibold tabular-nums text-white">
+                  $26,500
+                </p>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between">
                 <p className="text-[11px] text-white/35">Demo data · sample workspace</p>
                 <p className="inline-flex items-center gap-1 text-[11px] font-medium text-[#9DABFF]">
                   Updates in real time
